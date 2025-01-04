@@ -36,7 +36,7 @@ const LoginPage = () => {
 
           {/* Email or Phone Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email or Phone</label>
+            <label className="block text-sm font-medium text-gray-700 text-left">Email or Phone</label>
             <input
               type="text"
               placeholder="Enter your email or phone number"
@@ -47,7 +47,7 @@ const LoginPage = () => {
 
           {/* Password Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
+            <label className="block text-sm font-medium text-gray-700 text-left">Password</label>
             <input
               type="password"
               placeholder="Enter your password"
