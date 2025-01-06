@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar.js";
 import axios from "axios";
 
 const ManageUsers = () => {
@@ -45,7 +44,7 @@ const ManageUsers = () => {
 
   return (
     <div className="admin-page">
-      <Sidebar />
+      
       <div className="admin-content">
         <h1>Manage Users</h1>
         <div className="add-user-form">

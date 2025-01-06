@@ -11,7 +11,28 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+
+.raleway-font {
+  font-family: 'Raleway', serif;
+  font-optical-sizing: auto;
+  font-weight: 800; 
+  font-style: normal;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+*{
+  color: #656786;
+ color: #725767;
+  color: #cd908b;
+  color: #343434;
+  
+  color: #4183c4;
+  color: #2daae1;
+ color: #069;
+ color: #3b5997;
+  
 }

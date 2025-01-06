@@ -4,8 +4,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage.js';
 import LoginPage from './pages/LoginPage.js'
 import Navbar from './components/Navbar';
-import Sidebar from './components/Sidebar';
-import Footer from './components/Footer';
 import AdminDashboard from './pages/Admin/Dashboard';
 import ManageUsers from './pages/Admin/ManageUsers';
 import ManageCourses from './pages/Admin/ManageCourses';
@@ -32,7 +30,6 @@ function App() {
       </BrowserRouter>
       <AdminDashboard/>
       <StudentProfile/>
-      
     </div>
   );
 }

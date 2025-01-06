@@ -1,21 +1,34 @@
 import React from 'react';
 
-const DashboardLayout = ({ title, children, image }) => {
+const DashboardLayout = ({ children, image }) => {
   return (
-<div className="flex flex-col bg-white min-h-screen">
-  <div className="bg-blue-600 text-white p-5 text-left text-2xl font-bold">
-    CAMPUS MANAGEMENT SYSTEM
-  </div>
-  <div className="flex justify-between items-center p-5">
-    <div className="flex-1 p-5 text-gray-700 text-lg">
-      {children}
+    <div className="flex flex-col bg-white min-h-screen">
+      
+      
+      {/* Main Content */}
+      <div className="flex flex-row items-center min-h-screen">
+        {/* Left Section: Text */}
+        <div className="w-3/5 p-10">
+          <h1 className="text-7xl font-extrabold text-left text-gray-800 leading-tight raleway-font">
+            CAMPUS <br />
+            <span className="text-yellow-600">MANAGEMENT</span> <br />
+            SYSTEM
+          </h1>
+          <div className="mt-8 text-2xl text-gray-600">
+            {children}
+          </div>
+        </div>
+        
+        {/* Right Section: Image */}
+        <div className="w-3/5 p-5 flex justify-center items-center">
+          <img
+            src={image}
+            alt="Dashboard Visual"
+            className=" object-cover"
+          />
+        </div>
+      </div>
     </div>
-    <div className="w-2/5">
-      <img src={image} alt="Dashboard Visual" className="rounded-lg" />
-    </div>
-  </div>
-</div>
-
   );
 };
 

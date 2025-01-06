@@ -9,7 +9,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-violet-500 to-indigo-400">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r  from-bluegrey to-heather">
       <div className="bg-white shadow-xl rounded-lg p-8 w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
 
@@ -19,15 +19,14 @@ const LoginPage = () => {
             {['admin', 'student', 'faculty'].map((roleType) => (
               <label
                 key={roleType}
-                className={`flex items-center cursor-pointer ${role === roleType ? 'text-indigo-600' : 'text-gray-600'}`}
-              >
+                className={`flex items-center cursor-pointer ${role === roleType ? 'text-bluegrey' : 'text-gray-600'}`}>
                 <input
                   type="radio"
                   name="role"
                   value={roleType}
                   checked={role === roleType}
                   onChange={(e) => setRole(e.target.value)}
-                  className="mr-2 accent-indigo-600"
+                  className="mr-2 accent-bluegrey"
                 />
                 {roleType.charAt(0).toUpperCase() + roleType.slice(1)}
               </label>
@@ -36,11 +35,11 @@ const LoginPage = () => {
 
           {/* Email or Phone Input */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 text-left">Email or Phone</label>
+            <label className="block text-sm font-medium text-gray-700 text-left">Email / Phone</label>
             <input
               type="text"
-              placeholder="Enter your email or phone number"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter your email / phone number"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-bluegrey focus:border-bluegrey"
               required
             />
           </div>
@@ -51,7 +50,7 @@ const LoginPage = () => {
             <input
               type="password"
               placeholder="Enter your password"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-indigo-500 focus:border-indigo-500"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-bluegrey focus:border-bluegrey"
               required
             />
           </div>
@@ -59,7 +58,7 @@ const LoginPage = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-200"
+            className="w-full bg-bluegrey text-white py-2 rounded-md hover:bg-lightbluegrey transition duration-200"
           >
             Login
           </button>
