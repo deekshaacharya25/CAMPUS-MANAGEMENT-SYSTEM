@@ -44,7 +44,7 @@ router.post("/", authenticate, async (req, res) => {
       console.log(req.files);
 
       // Extract fields from the request body
-      const { name, email ,phone, role, facultyId, password } = req.body;
+      const { name, email ,phone, role, password } = req.body;
       const user_id = req.user.id;
 
       // Validate required fields
