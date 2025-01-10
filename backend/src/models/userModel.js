@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
         type: Array, 
         default: [] 
     },
+    facultyId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref: "users",
+    },
     isactive: {
         type: Number,
         default: 1,

@@ -8,13 +8,13 @@ import validator from "validator";
 
 router.delete("/", async (req, res) => {
     try {
-       let user_id = req.query.user_id;
-       if (!user_id || user_id == undefined) {
-                   return send(res, setErrorRes(RESPONSE.REQUIRED,"user_id"));
+       let u_id = req.query.id;
+       if (!u_id || u_id == undefined) {
+                   return send(res, setErrorRes(RESPONSE.REQUIRED,"u_id"));
                }
          let userData = await userModel.aggregate([
                    {
-                $match :{ $expr : { $eq : ["$_id", {$toObjectId: user_id}] }, 
+                $match :{ $expr : { $eq : ["$_id", {$toObjectId: u_id}] }, 
                 isactive: STATE.ACTIVE,
             },
             },
@@ -27,7 +27,7 @@ router.delete("/", async (req, res) => {
         console.log(userData);
 
     await userModel.deleteOne({
-        _id: user_id,
+        _id: u_id,
  
 });
 

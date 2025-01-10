@@ -8,18 +8,18 @@ import validator from "validator";
 
 router.put("/", async (req, res) => {
     try {
-       let user_id = req.query.user_id;
+       let u_id = req.query.id;
 
        let {name, email, phone, password} =req.body;
        let updates= {};
        
 
-       if (!user_id || user_id == undefined) {
-                   return send(res, setErrorRes(RESPONSE.REQUIRED,"user_id"));
+       if (!u_id || u_id == undefined) {
+                   return send(res, setErrorRes(RESPONSE.REQUIRED,"u_id"));
                }
          let userData = await userModel.aggregate([
                    {
-                $match :{ $expr : { $eq : ["$_id", {$toObjectId: user_id}] }, 
+                $match :{ $expr : { $eq : ["$_id", {$toObjectId: u_id}] }, 
                 isactive: STATE.ACTIVE,
             },
             },
@@ -56,7 +56,7 @@ router.put("/", async (req, res) => {
             updates.password = password;
         }
     await userModel.updateMany(
-        { _id: user_id,
+        { _id: u_id,
 
          }, { 
             $set: updates,
