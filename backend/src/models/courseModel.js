@@ -9,20 +9,28 @@ const courseSchema = new mongoose.Schema({
     description: {
         type: String,
     },
-    faculty_id: {
+    facultyId: {
         type: Schema.Types.ObjectId,
         ref: "users",
         required: true,
     },
+    user_id: { 
+        type: mongoose.Schema.Types.ObjectId,
+         ref: "users" },
     students: [
         {
             type: Schema.Types.ObjectId,
             ref: "users", 
         },
     ],
+    
     createdAt: {
         type: Date,
         default: Date.now,
+    },
+    isactive: {
+        type: Number,
+        default: 1,
     },
 });
 

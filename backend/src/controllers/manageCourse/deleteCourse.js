@@ -4,8 +4,9 @@ import courseModel from "../../models/courseModel.js";
 import { RESPONSE } from "../../config/global.js";
 import {send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
+import { authenticate } from "../../middlewares/authenticate.js";
 
-router.delete("/", async (req, res) => {
+router.delete("/",authenticate, async (req, res) => {
     try {
        let course_id = req.query.course_id;
        if (!course_id || course_id == undefined) {

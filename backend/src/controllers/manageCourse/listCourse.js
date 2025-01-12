@@ -5,8 +5,8 @@ import { RESPONSE } from "../../config/global.js";
 import {send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
 import validator from "validator";
-import { authenticate } from "../../middlewares/authenticate.js";
-router.get("/", authenticate, async (req, res) => {
+
+router.get("/", async (req, res) => {
     try {
        
         // let course_id =req.params.id;
@@ -47,7 +47,6 @@ router.get("/", authenticate, async (req, res) => {
         }
         courseData = (courseData || []).map((itm) => ({
             ...itm,
-            image: (itm.image || []).map((img) => "/" + img),
           }));
           
 

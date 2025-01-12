@@ -6,7 +6,7 @@ import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { ROLE, STATE } from "../../config/constants.js";
 import validator from "validator";
 import { authenticate } from "../../middlewares/authenticate.js";
-
+import mongoose from "mongoose";
 
 
 router.post("/", authenticate, async (req, res) => {
@@ -17,7 +17,7 @@ router.post("/", authenticate, async (req, res) => {
     }
 
       // Extract fields from the request body
-      const { title, description, faculty_id, students, createdAt} = req.body;
+      const { title, description, facultyId, students, createdAt} = req.body;
       const user_id = req.user.id;
 
       // Validate required fields
@@ -31,9 +31,9 @@ router.post("/", authenticate, async (req, res) => {
         return send(res, setErrorRes(RESPONSE.REQUIRED,"description"));
      
     }
-    if (!faculty_id || faculty_id == undefined) {
+    if (!facultyId || facultyId == undefined) {
       
-        return send(res, setErrorRes(RESPONSE.REQUIRED,"faculty_id"));
+        return send(res, setErrorRes(RESPONSE.REQUIRED,"facultyId"));
      
     }
     if (!students || students == undefined) {
@@ -41,8 +41,9 @@ router.post("/", authenticate, async (req, res) => {
         return send(res, setErrorRes(RESPONSE.REQUIRED,"students"));
     }
 
-   
-      const isExist = await userModel.aggregate([
+    let studentIds = students.split(",").map((studentId) => new mongoose.Types.ObjectId(studentId));
+  
+      const isExist = await courseModel.aggregate([
         {
           $match: {
             title: title,
@@ -55,11 +56,12 @@ router.post("/", authenticate, async (req, res) => {
         return send(res, setErrorRes(RESPONSE.ALREADY_EXISTS, "title"));
       }
 
-      await userModel.create({
+      await courseModel.create({
         title: title,
         description: description,
-        faculty_id: faculty_id,
-        students: students,
+        facultyId: facultyId,
+        students: studentIds,
+        user_id: user_id,
         createdAt:createdAt,
       });
 
