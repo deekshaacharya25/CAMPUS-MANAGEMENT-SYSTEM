@@ -1,12 +1,12 @@
 import { response, Router } from "express";
 const router = Router();
-import courseModel from "../../models/courseModel.js";
+import departmentModel from "../../models/departmentModel.js";
 import { RESPONSE } from "../../config/global.js";
 import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { ROLE, STATE } from "../../config/constants.js";
 import validator from "validator";
 import { authenticate } from "../../middlewares/authenticate.js";
-
+import mongoose from "mongoose";
 
 
 router.post("/", authenticate, async (req, res) => {
@@ -17,13 +17,13 @@ router.post("/", authenticate, async (req, res) => {
     }
 
       // Extract fields from the request body
-      const { title, description, faculty_id, students, createdAt} = req.body;
+      const { name, description, faculties, createdAt} = req.body;
       const user_id = req.user.id;
 
       // Validate required fields
-      if (!title || title == undefined) {
+      if (!name || name == undefined) {
 
-        return send(res, setErrorRes(RESPONSE.REQUIRED,"title"));
+        return send(res, setErrorRes(RESPONSE.REQUIRED,"name"));
     }
     
     if (!description || description == undefined) {
@@ -31,35 +31,30 @@ router.post("/", authenticate, async (req, res) => {
         return send(res, setErrorRes(RESPONSE.REQUIRED,"description"));
      
     }
-    if (!faculty_id || faculty_id == undefined) {
+    if (!faculties || faculties == undefined) {
       
-        return send(res, setErrorRes(RESPONSE.REQUIRED,"faculty_id"));
+        return send(res, setErrorRes(RESPONSE.REQUIRED,"faculties"));
      
     }
-    if (!students || students == undefined) {
-      
-        return send(res, setErrorRes(RESPONSE.REQUIRED,"students"));
-    }
-
-   
-      const isExist = await userModel.aggregate([
+  let facultyIds = faculties.split(",").map((facultyId) => new mongoose.Types.ObjectId(facultyId));
+      const isExist = await departmentModel.aggregate([
         {
           $match: {
-            title: title,
+            name: name,
             isactive: STATE.ACTIVE,
           },
         },
       ]);
 
       if (isExist.length > 0) {
-        return send(res, setErrorRes(RESPONSE.ALREADY_EXISTS, "title"));
+        return send(res, setErrorRes(RESPONSE.ALREADY_EXISTS, "name"));
       }
 
-      await userModel.create({
-        title: title,
+      await departmentModel.create({
+        name: name,
         description: description,
-        faculty_id: faculty_id,
-        students: students,
+        faculties: facultyIds,
+        user_id: user_id,
         createdAt:createdAt,
       });
 

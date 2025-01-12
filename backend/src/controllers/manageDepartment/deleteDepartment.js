@@ -1,32 +1,33 @@
 import { response, Router } from "express"
 const router = Router();
-import courseModel from "../../models/courseModel.js";
+import departmentModel from "../../models/departmentModel.js";
 import { RESPONSE } from "../../config/global.js";
 import {send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
+import { authenticate } from "../../middlewares/authenticate.js";
 
-router.delete("/", async (req, res) => {
+router.delete("/",authenticate, async (req, res) => {
     try {
-       let course_id = req.query.course_id;
-       if (!course_id || course_id == undefined) {
-                   return send(res, setErrorRes(RESPONSE.REQUIRED,"course_id"));
+       let department_id = req.query.department_id;
+       if (!department_id || department_id == undefined) {
+                   return send(res, setErrorRes(RESPONSE.REQUIRED,"department_id"));
                }
-         let courseData = await courseModel.aggregate([
+         let departmentData = await departmentModel.aggregate([
                    {
-                $match :{ $expr : { $eq : ["$_id", {$toObjectId: course_id}] }, 
+                $match :{ $expr : { $eq : ["$_id", {$toObjectId: department_id}] }, 
                 isactive: STATE.ACTIVE,
             },
             },
          ]);
 
-         if(courseData.length === 0){
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "course data"));
+         if(departmentData.length === 0){
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "department data"));
          }
 
-        console.log(courseData);
+        console.log(departmentData);
 
-    await courseModel.deleteOne({
-        _id: course_id,
+    await departmentModel.deleteOne({
+        _id: department_id,
  
 });
 

@@ -1,6 +1,6 @@
 import { response, Router } from "express"
 const router = Router();
-import courseModel from "../../models/courseModel.js";
+import departmentModel from "../../models/departmentModel.js";
 import { RESPONSE } from "../../config/global.js";
 import {send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
@@ -8,65 +8,56 @@ import validator from "validator";
 
 router.put("/", async (req, res) => {
     try {
-       let course_id = req.query.course_id;
+       let department_id = req.query.department_id;
 
-       let {title, description, faculty_id, students} =req.body;
+       let {name, description, faculties} =req.body;
        let updates= {};
        
 
-       if (!course_id || course_id == undefined) {
-                   return send(res, setErrorRes(RESPONSE.REQUIRED,"course_id"));
+       if (!department_id || department_id == undefined) {
+                   return send(res, setErrorRes(RESPONSE.REQUIRED,"department_id"));
                }
-         let courseData = await courseModel.aggregate([
+         let departmentData = await departmentModel.aggregate([
                    {
-                $match :{ $expr : { $eq : ["$_id", {$toObjectId: course_id}] }, 
+                $match :{ $expr : { $eq : ["$_id", {$toObjectId: department_id}] }, 
                 isactive: STATE.ACTIVE,
             },
             },
          ]);
 
-         if(courseData.length === 0){
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "course data"));
+         if(departmentData.length === 0){
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "department data"));
          }
 
-        console.log(courseData);
+        console.log(departmentData);
 
-        if( title && title != undefined){
-            let isExist = await courseModel.aggregate([
+        if( name && name != undefined){
+            let isExist = await departmentModel.aggregate([
                 {
                 $match: {
-                    title:title,
+                    name:name,
                     isactive:STATE.ACTIVE,
                 }
             },
             ]);
-            updates.title = title;
+            updates.name = name;
         }
         if( description && description != undefined){
             updates.description = description;
         }
         
-        if( faculty_id && faculty_id != undefined){
-            updates.faculty_id = faculty_id;
+        if( faculties && faculties != undefined){
+            updates.faculties = faculties;
         }
-        if( students && students != undefined){
-            updates.students = students;
-        }
-    await courseModel.updateMany(
-        { _id: course_id,
+   
+    await departmentModel.updateMany(
+        { _id: department_id,
 
          }, { 
             $set: updates,
          }
     );
-    //     await courseModel.findByIdAndUpdate({
-    //         _id: course_id,
-    //         isactive: STATE.ACTIVE,
-    //     },
-    // {
-    //     isactive: STATE.INACTIVE,
-    // });
-    
+
     console.log(updates);
 
 
