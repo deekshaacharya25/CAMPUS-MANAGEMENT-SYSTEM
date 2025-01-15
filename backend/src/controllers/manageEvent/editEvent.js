@@ -1,79 +1,62 @@
-import { response, Router } from "express"
-const router = Router();
-import courseModel from "../../models/courseModel.js";
-import { RESPONSE } from "../../config/global.js";
-import {send, setErrorRes } from "../../helper/responseHelper.js";
-import { STATE } from "../../config/constants.js";
-import validator from "validator";
+import express from "express";
+import { authenticate } from "../../middleware/auth.js";
+import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import eventModel from "../../models/eventModel.js";
+import { ROLE } from "../../config/constants.js";
 
-router.put("/", async (req, res) => {
+const router = express.Router();
+
+router.put("/:id", authenticate, async (req, res) => {
     try {
-       let course_id = req.query.course_id;
+        // Only admin and faculty can edit events
+        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+            return send(res, RESPONSE.UNAUTHORIZED);
+        }
 
-       let {title, description, faculty_id, students} =req.body;
-       let updates= {};
-       
+        const eventId = req.params.id;
+        const {
+            title,
+            description,
+            start_date,
+            end_date,
+            venue,
+            type,
+            category
+        } = req.body;
 
-       if (!course_id || course_id == undefined) {
-                   return send(res, setErrorRes(RESPONSE.REQUIRED,"course_id"));
-               }
-         let courseData = await courseModel.aggregate([
-                   {
-                $match :{ $expr : { $eq : ["$_id", {$toObjectId: course_id}] }, 
-                isactive: STATE.ACTIVE,
+        // Check if event exists
+        const event = await eventModel.findById(eventId);
+        if (!event) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "event"));
+        }
+
+        // Only creator or admin can edit
+        if (event.created_by.toString() !== req.user.id && req.user.role !== ROLE.ADMIN) {
+            return send(res, RESPONSE.UNAUTHORIZED);
+        }
+
+        // Update event
+        const updatedEvent = await eventModel.findByIdAndUpdate(
+            eventId,
+            {
+                title,
+                description,
+                start_date: start_date ? new Date(start_date) : event.start_date,
+                end_date: end_date ? new Date(end_date) : event.end_date,
+                venue,
+                type,
+                category,
+                updated_at: new Date()
             },
-            },
-         ]);
+            { new: true }
+        );
 
-         if(courseData.length === 0){
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "course data"));
-         }
+        return send(res, RESPONSE.SUCCESS, updatedEvent);
 
-        console.log(courseData);
-
-        if( title && title != undefined){
-            let isExist = await courseModel.aggregate([
-                {
-                $match: {
-                    title:title,
-                    isactive:STATE.ACTIVE,
-                }
-            },
-            ]);
-            updates.title = title;
-        }
-        if( description && description != undefined){
-            updates.description = description;
-        }
-        
-        if( faculty_id && faculty_id != undefined){
-            updates.faculty_id = faculty_id;
-        }
-        if( students && students != undefined){
-            updates.students = students;
-        }
-    await courseModel.updateMany(
-        { _id: course_id,
-
-         }, { 
-            $set: updates,
-         }
-    );
-    //     await courseModel.findByIdAndUpdate({
-    //         _id: course_id,
-    //         isactive: STATE.ACTIVE,
-    //     },
-    // {
-    //     isactive: STATE.INACTIVE,
-    // });
-    
-    console.log(updates);
-
-
-    return send(res,RESPONSE.SUCCESS);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
+
 export default router;

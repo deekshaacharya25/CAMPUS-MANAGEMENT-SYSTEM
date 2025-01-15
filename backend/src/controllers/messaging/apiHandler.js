@@ -1,14 +1,11 @@
-import {Router} from "express";
+import { Router } from "express";
+import directMessages from "./directMessages.js";
+import forumPosts from "./forumPosts.js";
+import { authenticate } from "../../middleware/auth.js";
+
 const router = Router();
 
-// import addMessage from "./addMessage.js"
-// import listMessage from "./listMessage.js"
-// import deleteMessage from "./deleteMessage.js"
-// import editMessage from "./editMessage.js"
-
-// router.use('/add',addMessage);
-// router.use('/list',listMessage);
-// router.use('/delete',deleteMessage);
-// router.use('/edit',editMessage);
+router.use('/direct', authenticate, directMessages);
+router.use('/forum', authenticate, forumPosts);
 
 export default router;

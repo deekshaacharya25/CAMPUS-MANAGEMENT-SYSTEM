@@ -71,7 +71,12 @@ router.post("/", authenticate, async (req, res) => {
       if (!validator.isEmail(email)) {
         return send(res, setErrorRes(RESPONSE.INVALID, "email"));
       }
-
+      let isValidPhone = phone.toString().match(/^\+91\d{10}$/);
+      // console.log(isValidPhone);
+      
+      if (!isValidPhone) {
+          return send(res, setErrorRes(RESPONSE.INVALID,"phone"));
+      }      
    
       const isExist = await userModel.aggregate([
         {

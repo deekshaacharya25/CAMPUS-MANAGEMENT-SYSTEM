@@ -1,14 +1,13 @@
-import {Router} from "express";
+// apiHandler.js
+import { Router } from "express";
 const router = Router();
 
-// import addUser from "./addUser.js"
-// import listUser from "./listUser.js"
-// import deleteUser from "./deleteUser.js"
-// import editUser from "./editUser.js"
+import studentProfile from "./studentProfile.js";
+import facultyProfile from "./facultyProfile.js";
+import updateProfile from "./updateProfileUtils.js";
 
-// router.use('/add',addUser);
-// router.use('/list',listUser);
-// router.use('/delete',deleteUser);
-// router.use('/edit',editUser);
+router.use('/student', studentProfile);
+router.use('/faculty', facultyProfile);
+router.use('/update', updateProfile);
 
 export default router;

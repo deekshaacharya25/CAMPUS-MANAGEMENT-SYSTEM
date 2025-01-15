@@ -1,60 +1,49 @@
-import { response, Router } from "express"
-const router = Router();
-import courseModel from "../../models/courseModel.js";
-import { RESPONSE } from "../../config/global.js";
-import {send, setErrorRes } from "../../helper/responseHelper.js";
+import express from "express";
+import { authenticate } from "../../middleware/auth.js";
+import { RESPONSE, send } from "../../config/response.js";
+import eventModel from "../../models/eventModel.js";
 import { STATE } from "../../config/constants.js";
-import validator from "validator";
-import { authenticate } from "../../middlewares/authenticate.js";
+
+const router = express.Router();
+
 router.get("/", authenticate, async (req, res) => {
     try {
-       
-        // let course_id =req.params.id;
-        // console.log(course_id);
-        let title =req.query.title;
-        let query={};
-        let course_id=req.query.id;
+        const { type, category, start_date, end_date, page = 1, limit = 10 } = req.query;
 
-        //..
-        // let teacher_id = req.course.id;
-        // query.teacher_id =teacher_id; //req.course.id;
-        // query.$expr = { $eq : ["$teacher_id", {$toObjectId: teacher_id}]}
-        // query.isactive= STATE.ACTIVE;
-        //..
-
-        title != undefined ? (query.title = title) : "";
-        
-        course_id != undefined
-        ? (query.$expr = { $eq : ["$_id", {$toObjectId: course_id}]})
-        : "";
-
-        console.log(query);
-        let courseData = await courseModel.aggregate([
-            {
-
-                $match: query,
-            },
-            {
-                $project: {
-                    isactive: 0,
-                    __v: 0,
-                },
-            },
-        ]);
-
-        if(courseData.length==0){
-            return setErrorRes(res, setErrorRes(RESPONSE.NOT_FOUND, "course Data"));
+        // Build query
+        let query = { isactive: STATE.ACTIVE };
+        if (type) query.type = type;
+        if (category) query.category = category;
+        if (start_date || end_date) {
+            query.start_date = {};
+            if (start_date) query.start_date.$gte = new Date(start_date);
+            if (end_date) query.start_date.$lte = new Date(end_date);
         }
-        courseData = (courseData || []).map((itm) => ({
-            ...itm,
-            image: (itm.image || []).map((img) => "/" + img),
-          }));
-          
 
-        return send(res,RESPONSE.SUCCESS,courseData);
+        // Get total count
+        const total = await eventModel.countDocuments(query);
+
+        // Get events with pagination
+        const events = await eventModel
+            .find(query)
+            .sort({ start_date: 1 })
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit))
+            .populate('created_by', 'name email');
+
+        return send(res, RESPONSE.SUCCESS, {
+            events,
+            pagination: {
+                total,
+                page: parseInt(page),
+                pages: Math.ceil(total / limit)
+            }
+        });
+
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
+
 export default router;

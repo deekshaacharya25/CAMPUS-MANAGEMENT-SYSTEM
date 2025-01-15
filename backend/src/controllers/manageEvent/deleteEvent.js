@@ -1,39 +1,42 @@
-import { response, Router } from "express"
-const router = Router();
-import courseModel from "../../models/courseModel.js";
-import { RESPONSE } from "../../config/global.js";
-import {send, setErrorRes } from "../../helper/responseHelper.js";
-import { STATE } from "../../config/constants.js";
+import express from "express";
+import { authenticate } from "../../middleware/auth.js";
+import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import eventModel from "../../models/eventModel.js";
+import { STATE, ROLE } from "../../config/constants.js";
 
-router.delete("/", async (req, res) => {
+const router = express.Router();
+
+router.delete("/:id", authenticate, async (req, res) => {
     try {
-       let course_id = req.query.course_id;
-       if (!course_id || course_id == undefined) {
-                   return send(res, setErrorRes(RESPONSE.REQUIRED,"course_id"));
-               }
-         let courseData = await courseModel.aggregate([
-                   {
-                $match :{ $expr : { $eq : ["$_id", {$toObjectId: course_id}] }, 
-                isactive: STATE.ACTIVE,
-            },
-            },
-         ]);
+        // Only admin and faculty can delete events
+        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+            return send(res, RESPONSE.UNAUTHORIZED);
+        }
 
-         if(courseData.length === 0){
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "course data"));
-         }
+        const eventId = req.params.id;
 
-        console.log(courseData);
+        // Check if event exists
+        const event = await eventModel.findById(eventId);
+        if (!event) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "event"));
+        }
 
-    await courseModel.deleteOne({
-        _id: course_id,
- 
-});
+        // Only creator or admin can delete
+        if (event.created_by.toString() !== req.user.id && req.user.role !== ROLE.ADMIN) {
+            return send(res, RESPONSE.UNAUTHORIZED);
+        }
 
-    return send(res,RESPONSE.SUCCESS);
+        // Soft delete the event
+        await eventModel.findByIdAndUpdate(eventId, {
+            isactive: STATE.DELETED
+        });
+
+        return send(res, RESPONSE.SUCCESS);
+
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
+
 export default router;

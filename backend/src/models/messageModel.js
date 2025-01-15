@@ -1,29 +1,35 @@
 import mongoose from "mongoose";
-import { Schema } from "mongoose";
+import { STATE } from "../config/constants.js";
 
 const messageSchema = new mongoose.Schema({
-    sender: {
-        type: Schema.Types.ObjectId,
-        ref: "users",
-        required: true,
+    sender_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    receiver: {
-        type: Schema.Types.ObjectId,
-        ref: "users",
-        required: true,
+    receiver_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
     },
-    message: {
+    content: {
         type: String,
         required: true,
-    },
-    sentAt: {
-        type: Date,
-        default: Date.now,
+        trim: true
     },
     isRead: {
         type: Boolean,
-        default: false,
+        default: false
     },
+    isactive: {
+        type: Number,
+        default: STATE.ACTIVE
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
-export default mongoose.model("messages", messageSchema);
+const messageModel = mongoose.model("Message", messageSchema);
+export default messageModel;

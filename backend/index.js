@@ -5,6 +5,7 @@ const app=express();
 
 import dotenv from "dotenv";
 import {connectDB} from "./src/helper/dbConnection.js";
+import './src/controllers/manageEvent/notificationCron.js';
 import routes from "./router.js";
 import path from "path";
 dotenv.config();
