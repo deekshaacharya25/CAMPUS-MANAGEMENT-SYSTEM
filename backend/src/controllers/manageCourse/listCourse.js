@@ -15,12 +15,7 @@ router.get("/", async (req, res) => {
         let query={};
         let course_id=req.query.id;
 
-        //..
-        // let teacher_id = req.course.id;
-        // query.teacher_id =teacher_id; //req.course.id;
-        // query.$expr = { $eq : ["$teacher_id", {$toObjectId: teacher_id}]}
-        // query.isactive= STATE.ACTIVE;
-        //..
+
 
         title != undefined ? (query.title = title) : "";
         

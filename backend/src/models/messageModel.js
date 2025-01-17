@@ -4,12 +4,12 @@ import { STATE } from "../config/constants.js";
 const messageSchema = new mongoose.Schema({
     sender_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     receiver_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     content: {
@@ -31,5 +31,5 @@ const messageSchema = new mongoose.Schema({
     }
 });
 
-const messageModel = mongoose.model("Message", messageSchema);
+const messageModel = mongoose.model("messages", messageSchema);
 export default messageModel;

@@ -1,47 +1,57 @@
-import express from "express";
-import { authenticate } from "../../middleware/auth.js";
-import { RESPONSE, send } from "../../config/response.js";
+import { Router } from "express"
+const router = Router();
 import eventModel from "../../models/eventModel.js";
+import { RESPONSE } from "../../config/global.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
+import { authenticate } from "../../middlewares/authenticate.js";
 
-const router = express.Router();
-
+// Route for listing events with filters
 router.get("/", authenticate, async (req, res) => {
     try {
-        const { type, category, start_date, end_date, page = 1, limit = 10 } = req.query;
-
-        // Build query
+        let title = req.query.title;
+        let type = req.query.type;
+        let category = req.query.category;
+        let event_id = req.query.id;
         let query = { isactive: STATE.ACTIVE };
-        if (type) query.type = type;
-        if (category) query.category = category;
-        if (start_date || end_date) {
-            query.start_date = {};
-            if (start_date) query.start_date.$gte = new Date(start_date);
-            if (end_date) query.start_date.$lte = new Date(end_date);
+
+        if (event_id && event_id != undefined) {
+            query = {
+                $and: [
+                    { isactive: STATE.ACTIVE },
+                    { $expr: { $eq: ["$_id", { $toObjectId: event_id }] } }
+                ]
+            };
+        } else {
+            if (title != undefined) query.title = title;
+            if (type != undefined) query.type = type;
+            if (category != undefined) query.category = category;
         }
 
-        // Get total count
-        const total = await eventModel.countDocuments(query);
+        let eventData = await eventModel.aggregate([
+            {
+                $match: query,
+            },
+            {
+                $project: {
+                    isactive: 0,
+                    __v: 0,
+                },
+            },
+        ]);
 
-        // Get events with pagination
-        const events = await eventModel
-            .find(query)
-            .sort({ start_date: 1 })
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit))
-            .populate('created_by', 'name email');
+        if (eventData.length == 0) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "event Data"));
+        }
 
-        return send(res, RESPONSE.SUCCESS, {
-            events,
-            pagination: {
-                total,
-                page: parseInt(page),
-                pages: Math.ceil(total / limit)
-            }
-        });
+        // If event_id was provided, return single event
+        if (event_id) {
+            return send(res, RESPONSE.SUCCESS, eventData[0]);
+        }
 
+        return send(res, RESPONSE.SUCCESS, eventData);
     } catch (error) {
-        console.error(error);
+        console.log(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });

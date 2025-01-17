@@ -1,6 +1,7 @@
 import express from "express";
-import { authenticate } from "../../middleware/auth.js";
-import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import { authenticate } from "../../middlewares/authenticate.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
+import { RESPONSE } from "../../config/global.js";
 import announcementModel from "../../models/announcementModel.js";
 import { STATE, ROLE } from "../../config/constants.js";
 
@@ -101,7 +102,7 @@ router.get("/", authenticate, async (req, res) => {
     }
 });
 
-// Get announcements (for faculty/admin)
+// Get sent announcements (for faculty/admin)
 router.get("/sent", authenticate, async (req, res) => {
     try {
         if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {

@@ -16,14 +16,10 @@ const librarySchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    trim: true
+    trim: true,
+    index: true
   },
   quantity: {
-    type: Number,
-    required: true,
-    min: 0
-  },
-  available_quantity: {
     type: Number,
     required: true,
     min: 0
@@ -39,31 +35,9 @@ const librarySchema = new mongoose.Schema({
   },
   added_by: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'users',
     required: true
   },
-  borrowers: [{
-    user_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    borrowed_date: {
-      type: Date,
-      default: Date.now
-    },
-    due_date: {
-      type: Date,
-      required: true
-    },
-    return_date: {
-      type: Date
-    },
-    status: {
-      type: String,
-      enum: ['borrowed', 'returned', 'overdue'],
-      default: 'borrowed'
-    }
-  }],
   isactive: {
     type: Number,
     default: STATE.ACTIVE
@@ -78,17 +52,12 @@ const librarySchema = new mongoose.Schema({
   }
 });
 
-// Add index for faster queries
-librarySchema.index({ isbn: 1 });
-librarySchema.index({ title: 1 });
-librarySchema.index({ author: 1 });
-
 // Update the updatedAt timestamp before saving
 librarySchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
 
-const libraryModel = mongoose.model("Library", librarySchema);
+const libraryModel = mongoose.model("library", librarySchema);
 
 export default libraryModel;

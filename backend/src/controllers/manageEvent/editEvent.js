@@ -1,31 +1,28 @@
-import express from "express";
-import { authenticate } from "../../middleware/auth.js";
-import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import { Router } from "express";
+const router = Router();
 import eventModel from "../../models/eventModel.js";
-import { ROLE } from "../../config/constants.js";
+import { RESPONSE } from "../../config/global.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
+import { STATE, ROLE } from "../../config/constants.js";
+import { authenticate } from "../../middlewares/authenticate.js";
 
-const router = express.Router();
-
-router.put("/:id", authenticate, async (req, res) => {
+router.put("/", authenticate, async (req, res) => {
     try {
-        // Only admin and faculty can edit events
-        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+        // Check if user is admin or teacher
+        if (![ROLE.ADMIN, ROLE.TEACHER].includes(req.user.role)) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
-        const eventId = req.params.id;
-        const {
-            title,
-            description,
-            start_date,
-            end_date,
-            venue,
-            type,
-            category
-        } = req.body;
+        let event_id = req.query.event_id;
+        let { title, description, start_date, end_date, venue, type, category } = req.body;
+        let updates = {};
 
-        // Check if event exists
-        const event = await eventModel.findById(eventId);
+        if (!event_id || event_id == undefined) {
+            return send(res, setErrorRes(RESPONSE.REQUIRED, "event_id"));
+        }
+
+        // Find the event and check if creator
+        const event = await eventModel.findById(event_id);
         if (!event) {
             return send(res, setErrorRes(RESPONSE.NOT_FOUND, "event"));
         }
@@ -35,26 +32,57 @@ router.put("/:id", authenticate, async (req, res) => {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
-        // Update event
-        const updatedEvent = await eventModel.findByIdAndUpdate(
-            eventId,
+        let eventData = await eventModel.aggregate([
             {
-                title,
-                description,
-                start_date: start_date ? new Date(start_date) : event.start_date,
-                end_date: end_date ? new Date(end_date) : event.end_date,
-                venue,
-                type,
-                category,
-                updated_at: new Date()
+                $match: {
+                    $expr: { $eq: ["$_id", { $toObjectId: event_id }] },
+                    isactive: STATE.ACTIVE,
+                },
             },
-            { new: true }
+        ]);
+
+        if (eventData.length === 0) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "event data"));
+        }
+
+        console.log(eventData);
+
+        if (title && title != undefined) {
+            updates.title = title;
+        }
+        if (description && description != undefined) {
+            updates.description = description;
+        }
+        if (start_date && start_date != undefined) {
+            updates.start_date = new Date(start_date);
+        }
+        if (end_date && end_date != undefined) {
+            updates.end_date = new Date(end_date);
+        }
+        if (venue && venue != undefined) {
+            updates.venue = venue;
+        }
+        if (type && type != undefined) {
+            updates.type = type;
+        }
+        if (category && category != undefined) {
+            updates.category = category;
+        }
+
+        await eventModel.updateMany(
+            {
+                _id: event_id,
+            },
+            {
+                $set: updates,
+            }
         );
 
-        return send(res, RESPONSE.SUCCESS, updatedEvent);
+        console.log(updates);
 
+        return send(res, RESPONSE.SUCCESS);
     } catch (error) {
-        console.error(error);
+        console.log(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });

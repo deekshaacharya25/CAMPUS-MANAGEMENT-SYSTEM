@@ -1,20 +1,35 @@
 import express from "express";
-import { authenticate } from "../../middleware/auth.js";
-import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
+import { RESPONSE } from "../../config/global.js";
 import libraryModel from "../../models/libraryModel.js";
 import { STATE } from "../../config/constants.js";
 
 const router = express.Router();
 
-router.get("/", authenticate, async (req, res) => {
+// Get all books with filters and pagination
+router.get("/", async (req, res) => {
     try {
-        // Get query parameters for filtering and pagination
-        const { search, category, page = 1, limit = 10 } = req.query;
-        
-        // Build query object
+        const { search, category, page = 1, limit = 10, id } = req.query;
+
+        // If ID is provided, return specific book
+        if (id) {
+            const book = await libraryModel
+                .findOne({
+                    _id: id,
+                    isactive: STATE.ACTIVE
+                })
+                .populate('added_by', 'name');
+
+            if (!book) {
+                return send(res, setErrorRes(RESPONSE.NOT_FOUND, "book"));
+            }
+
+            return send(res, RESPONSE.SUCCESS, book);
+        }
+
+        // Otherwise, proceed with list query
         let query = { isactive: STATE.ACTIVE };
-        
-        // Add search functionality
+
         if (search) {
             query.$or = [
                 { title: { $regex: search, $options: 'i' } },
@@ -23,65 +38,28 @@ router.get("/", authenticate, async (req, res) => {
             ];
         }
 
-        // Add category filter
         if (category) {
             query.category = category;
         }
 
-        // Calculate skip value for pagination
-        const skip = (parseInt(page) - 1) * parseInt(limit);
+        const total = await libraryModel.countDocuments(query);
 
-        // Get total count for pagination
-        const totalBooks = await libraryModel.countDocuments(query);
-
-        // Fetch books with pagination
         const books = await libraryModel
             .find(query)
-            .select('-borrowers') // Exclude borrowers array for security
-            .skip(skip)
+            .sort({ createdAt: -1 })
+            .skip((parseInt(page) - 1) * parseInt(limit))
             .limit(parseInt(limit))
-            .sort({ createdAt: -1 }); // Sort by newest first
+            .populate('added_by', 'name');
 
-        // If no books found
-        if (!books || books.length === 0) {
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "books"));
-        }
-
-        // Return success with pagination info
         return send(res, RESPONSE.SUCCESS, {
             books,
             pagination: {
-                total: totalBooks,
+                total,
                 page: parseInt(page),
-                pages: Math.ceil(totalBooks / parseInt(limit)),
+                pages: Math.ceil(total / parseInt(limit)),
                 limit: parseInt(limit)
             }
         });
-
-    } catch (error) {
-        console.error(error);
-        return send(res, RESPONSE.UNKNOWN_ERR);
-    }
-});
-
-// Get book details by ID
-router.get("/:id", authenticate, async (req, res) => {
-    try {
-        const bookId = req.params.id;
-        
-        const book = await libraryModel
-            .findOne({ 
-                _id: bookId, 
-                isactive: STATE.ACTIVE 
-            })
-            .populate('added_by', 'name email') // Populate admin details
-            .populate('borrowers.user_id', 'name email'); // Populate borrower details
-
-        if (!book) {
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "book"));
-        }
-
-        return send(res, RESPONSE.SUCCESS, book);
 
     } catch (error) {
         console.error(error);

@@ -1,8 +1,8 @@
 import cron from 'node-cron';
-import eventModel from '../models/eventModel.js';
-import notificationModel from '../models/notificationModel.js';
-import userModel from '../models/userModel.js';
-import { STATE } from '../config/constants.js';
+import eventModel from '../../models/eventModel.js';  
+import notificationModel from '../../models/notificationModel.js';  
+import userModel from '../../models/userModel.js'; 
+import { STATE } from '../../config/constants.js';  
 
 // Run every day at midnight
 cron.schedule('0 0 * * *', async () => {

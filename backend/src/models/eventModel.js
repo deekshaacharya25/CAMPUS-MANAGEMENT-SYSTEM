@@ -1,31 +1,61 @@
 import mongoose from "mongoose";
+import { STATE } from "../config/constants.js";
 
 const eventSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
+        trim: true
     },
     description: {
         type: String,
+        required: true,
+        trim: true
     },
-    date: {
+    start_date: {
         type: Date,
-        required: true,
+        required: true
     },
-    location: {
+    end_date: {
+        type: Date
+    },
+    venue: {
+        type: String,
+        trim: true
+    },
+    type: {
         type: String,
         required: true,
+        enum: ['ACADEMIC', 'CAMPUS'],
+        uppercase: true
     },
-    organizer: {
+    category: {
         type: String,
-        required: true,
+        uppercase: true,
+        validate: {
+            validator: function(value) {
+                if (this.type === 'ACADEMIC') {
+                    return ['EXAM', 'HOLIDAY', 'ASSIGNMENT', 'LECTURE'].includes(value);
+                }
+                return ['CULTURAL', 'SPORTS', 'WORKSHOP', 'SEMINAR'].includes(value);
+            },
+            message: 'Invalid category for the selected event type'
+        }
     },
-    attendees: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "users",
-        },
-    ],
+    created_by: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true
+    },
+    isactive: {
+        type: Number,
+        default: STATE.ACTIVE
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
-export default mongoose.model("events", eventSchema);
+const eventModel = mongoose.model("Event", eventSchema);
+export default eventModel;

@@ -1,40 +1,55 @@
-import express from "express";
-import { authenticate } from "../../middleware/auth.js";
-import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import { Router } from "express"
+const router = Router();
 import eventModel from "../../models/eventModel.js";
+import { RESPONSE } from "../../config/global.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE, ROLE } from "../../config/constants.js";
+import mongoose from "mongoose";
+import { authenticate } from "../../middlewares/authenticate.js";
 
-const router = express.Router();
-
-router.delete("/:id", authenticate, async (req, res) => {
+router.delete("/", authenticate, async (req, res) => {
     try {
-        // Only admin and faculty can delete events
-        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+        if (![ROLE.ADMIN, ROLE.TEACHER].includes(req.user.role)) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
-        const eventId = req.params.id;
+        let event_id = req.query.event_id;
 
-        // Check if event exists
-        const event = await eventModel.findById(eventId);
-        if (!event) {
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "event"));
+        if (!event_id || event_id == undefined) {
+            return send(res, setErrorRes(RESPONSE.REQUIRED, "event_id"));
         }
+
+        if (!mongoose.Types.ObjectId.isValid(event_id)) {
+            return send(res, setErrorRes(RESPONSE.INVALID, "event_id"));
+        }
+
+        const objectId = new mongoose.Types.ObjectId(event_id);
+        let eventData = await eventModel.aggregate([
+            {
+                $match: {
+                    $expr: { $eq: ["$_id", objectId] },
+                    isactive: STATE.ACTIVE,
+                },
+            },
+        ]);
+
+        if (eventData.length === 0) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "event data"));
+        }
+
+        console.log(eventData);
 
         // Only creator or admin can delete
-        if (event.created_by.toString() !== req.user.id && req.user.role !== ROLE.ADMIN) {
+        if (eventData[0].created_by.toString() !== req.user.id && req.user.role !== ROLE.ADMIN) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
-        // Soft delete the event
-        await eventModel.findByIdAndUpdate(eventId, {
-            isactive: STATE.DELETED
-        });
+
+        await eventModel.deleteOne({ _id: event_id });
 
         return send(res, RESPONSE.SUCCESS);
-
     } catch (error) {
-        console.error(error);
+        console.log(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });

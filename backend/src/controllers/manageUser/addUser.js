@@ -7,11 +7,9 @@ import { ROLE, STATE } from "../../config/constants.js";
 import validator from "validator";
 import { authenticate } from "../../middlewares/authenticate.js";
 import multer from "multer";
-import image from "../../middlewares/uploads.js";
+import { image } from "../../middlewares/uploads.js";
 
-const upload = image.array("image");
-
-router.post("/", authenticate, async (req, res) => {
+router.post("/", authenticate, image, async (req, res) => {
   try {
     // Check user role (if required)
     if (req.user.role !== ROLE.ADMIN) {

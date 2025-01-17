@@ -4,12 +4,12 @@ import { STATE } from "../config/constants.js";
 const notificationSchema = new mongoose.Schema({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     event_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event',
+        ref: 'events',
         required: true
     },
     title: {
@@ -39,5 +39,5 @@ const notificationSchema = new mongoose.Schema({
     }
 });
 
-const notificationModel = mongoose.model("Notification", notificationSchema);
+const notificationModel = mongoose.model("notifications", notificationSchema);
 export default notificationModel;

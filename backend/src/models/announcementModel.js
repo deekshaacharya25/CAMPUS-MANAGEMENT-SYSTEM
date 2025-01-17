@@ -13,7 +13,7 @@ const announcementSchema = new mongoose.Schema({
     },
     sender_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     recipients: {
@@ -23,15 +23,15 @@ const announcementSchema = new mongoose.Schema({
     },
     department_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Department'
+        ref: 'departments'
     },
     course_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course'
+        ref: 'courses'
     },
     student_ids: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'users'
     }],
     isactive: {
         type: Number,
@@ -43,5 +43,5 @@ const announcementSchema = new mongoose.Schema({
     }
 });
 
-const announcementModel = mongoose.model("Announcement", announcementSchema);
+const announcementModel = mongoose.model("announcements", announcementSchema);
 export default announcementModel;

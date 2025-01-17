@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
+import { RESPONSE } from "../../config/global.js";
 import forumPostModel from "../../models/forumPostModel.js";
 import { STATE } from "../../config/constants.js";
 

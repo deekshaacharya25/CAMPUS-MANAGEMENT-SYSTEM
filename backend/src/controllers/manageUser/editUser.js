@@ -6,12 +6,9 @@ import {send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
 import validator from "validator";
 import mongoose from "mongoose";
-import multer from 'multer';
-import image from "../../middlewares/uploads.js";
+import {image} from "../../middlewares/uploads.js";
 
-const upload = image.array("image");
-
-router.put("/", upload, async (req, res) => {
+router.put("/:id", image, async (req, res) => {
     try {
        let u_id = req.query.u_id;
 
@@ -89,7 +86,7 @@ router.put("/", upload, async (req, res) => {
 
     return send(res,RESPONSE.SUCCESS);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });

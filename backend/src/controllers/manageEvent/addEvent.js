@@ -1,6 +1,7 @@
 import express from "express";
-import { authenticate } from "../../middleware/auth.js";
-import { RESPONSE, send, setErrorRes } from "../../config/response.js";
+import { authenticate } from "../../middlewares/authenticate.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
+import { RESPONSE } from "../../config/global.js";
 import eventModel from "../../models/eventModel.js";
 import { STATE, ROLE } from "../../config/constants.js";
 
@@ -9,7 +10,7 @@ const router = express.Router();
 router.post("/", authenticate, async (req, res) => {
     try {
         // Only admin and faculty can add events
-        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+        if (![ROLE.ADMIN, ROLE.TEACHER].includes(req.user.role)) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
