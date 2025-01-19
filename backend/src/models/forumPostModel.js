@@ -4,7 +4,7 @@ import { STATE } from "../config/constants.js";
 const forumPostSchema = new mongoose.Schema({
     author_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     title: {
@@ -12,11 +12,15 @@ const forumPostSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    content: {
+    caption: {
         type: String,
         required: true,
         trim: true
     },
+    images: [{
+        type: String,
+        trim: true
+    }],
     category: {
         type: String,
         required: true,
@@ -25,11 +29,15 @@ const forumPostSchema = new mongoose.Schema({
     comments: [{
         user_id: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+            ref: 'users'
         },
-        content: {
+        caption: {
             type: String,
             required: true
+        },
+        image: {
+            type: String,
+            trim: true
         },
         createdAt: {
             type: Date,

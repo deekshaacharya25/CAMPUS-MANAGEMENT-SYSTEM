@@ -6,8 +6,8 @@ import forumPosts from "./forumPosts.js";
 
 const router = Router();
 
-router.use('/direct', authenticate, directMessages);
-router.use('/announcements', authenticate, announcements);
-router.use('/forum', authenticate, forumPosts);
+router.use('/direct', directMessages);
+router.use('/announcement', announcements);
+router.use('/forum',forumPosts);
 
 export default router;

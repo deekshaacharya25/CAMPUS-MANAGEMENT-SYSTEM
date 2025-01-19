@@ -2,6 +2,14 @@ import mongoose from "mongoose";
 import { STATE } from "../config/constants.js";
 
 const notificationSchema = new mongoose.Schema({
+    title: {
+        type: String,
+        required: true
+    },
+    message: {
+        type: String,
+        required: true
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users',
@@ -12,18 +20,10 @@ const notificationSchema = new mongoose.Schema({
         ref: 'events',
         required: true
     },
-    title: {
-        type: String,
-        required: true
-    },
-    message: {
-        type: String,
-        required: true
-    },
     type: {
         type: String,
-        enum: ['EVENT', 'DEADLINE', 'REMINDER'],
-        default: 'EVENT'
+        enum: ['event', 'announcement', 'message'],
+        required: true
     },
     isRead: {
         type: Boolean,
@@ -32,11 +32,9 @@ const notificationSchema = new mongoose.Schema({
     isactive: {
         type: Number,
         default: STATE.ACTIVE
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
     }
+}, {
+    timestamps: true
 });
 
 const notificationModel = mongoose.model("notifications", notificationSchema);

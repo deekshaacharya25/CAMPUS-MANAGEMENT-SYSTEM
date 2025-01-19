@@ -4,36 +4,28 @@ import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { RESPONSE } from "../../config/global.js";
 import announcementModel from "../../models/announcementModel.js";
 import { STATE, ROLE } from "../../config/constants.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 // Create announcement
 router.post("/create", authenticate, async (req, res) => {
     try {
-        // Only admin and faculty can create announcements
-        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+        if (req.user.role !== ROLE.TEACHER) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
-        const {
-            title,
-            content,
-            recipients,
-            department_id,
-            course_id,
-            student_ids
-        } = req.body;
+        const { title, content, recipients, department_id, course_id, student_ids } = req.body;
 
-        if (!title || !content || !recipients) {
-            return send(res, setErrorRes(RESPONSE.REQUIRED, "title, content and recipients"));
+        if (!title || !content) {
+            return send(res, setErrorRes(RESPONSE.REQUIRED, "title and content"));
         }
 
-        // Create announcement
         const announcement = await announcementModel.create({
             title,
             content,
             sender_id: req.user.id,
-            recipients,
+            recipients: recipients || 'ALL',
             department_id,
             course_id,
             student_ids,
@@ -54,7 +46,6 @@ router.get("/", authenticate, async (req, res) => {
         const userId = req.user.id;
         const { page = 1, limit = 10 } = req.query;
 
-        // Build query based on user's role and affiliations
         let query = {
             isactive: STATE.ACTIVE,
             $or: [
@@ -63,7 +54,6 @@ router.get("/", authenticate, async (req, res) => {
             ]
         };
 
-        // If user has department_id or course_id, include those announcements
         if (req.user.department_id) {
             query.$or.push({ 
                 recipients: 'DEPARTMENT',
@@ -102,10 +92,10 @@ router.get("/", authenticate, async (req, res) => {
     }
 });
 
-// Get sent announcements (for faculty/admin)
+// Get sent announcements (for TEACHER/admin)
 router.get("/sent", authenticate, async (req, res) => {
     try {
-        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+        if (![ROLE.ADMIN, ROLE.TEACHER].includes(req.user.role)) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
@@ -143,23 +133,51 @@ router.get("/sent", authenticate, async (req, res) => {
 });
 
 // Delete announcement
-router.delete("/:id", authenticate, async (req, res) => {
+router.delete("/delete", authenticate, async (req, res) => {
     try {
-        if (![ROLE.ADMIN, ROLE.FACULTY].includes(req.user.role)) {
+        if (![ROLE.ADMIN, ROLE.TEACHER].includes(req.user.role)) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
-        const announcement = await announcementModel.findOne({
-            _id: req.params.id,
-            sender_id: req.user.id
-        });
+        let announcement_id = req.query.announcement_id;
 
-        if (!announcement) {
+        console.log("Announcement ID:", announcement_id);
+        console.log("User ID:", req.user.id);
+
+        if (!announcement_id || announcement_id == undefined) {
+            return send(res, setErrorRes(RESPONSE.REQUIRED, "announcement_id"));
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(announcement_id)) {
+            return send(res, setErrorRes(RESPONSE.INVALID, "announcement_id"));
+        }
+
+        const objectId = new mongoose.Types.ObjectId(announcement_id);
+        
+        let checkAnnouncement = await announcementModel.findOne({
+            _id: objectId,
+            isactive: STATE.ACTIVE
+        });
+        
+        console.log("Found announcement:", checkAnnouncement);
+
+        let announcementData = await announcementModel.aggregate([
+            {
+                $match: {
+                    $expr: { $eq: ["$_id", objectId] },
+                    isactive: STATE.ACTIVE,
+                    sender_id: new mongoose.Types.ObjectId(req.user.id)  // Convert user ID to ObjectId
+                }
+            }
+        ]);
+
+        if (announcementData.length === 0) {
             return send(res, setErrorRes(RESPONSE.NOT_FOUND, "announcement"));
         }
 
-        announcement.isactive = STATE.DELETED;
-        await announcement.save();
+        await announcementModel.deleteOne({
+            _id: announcement_id
+        });
 
         return send(res, RESPONSE.SUCCESS);
 
