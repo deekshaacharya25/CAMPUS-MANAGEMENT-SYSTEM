@@ -13,23 +13,22 @@ import StudentDashboard from './pages/Student/Dashboard';
 import DashboardLayout from './components/DashboardLayout.js';
 import FacultyProfile from './pages/Faculty/Profile.js';
 import StudentProfile from './pages/Student/Profile.js';
-function App() {
+
+const App = () => {
   return (
-<div className="App">
+    <div className="App">
       <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<RegisterPage/>}></Route>
-        <Route path="/loginpage" element={<LoginPage/>}></Route>
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/manage-users" element={<ManageUsers />} />
-        <Route path="/admin/manage-courses" element={<ManageCourses />} />
-        <Route path="/admin/manage-events" element={<ManageEvents />} />
-        <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
-        <Route path="/student/dashboard" element={<StudentDashboard />} />
-      </Routes>
+        <Routes>
+          <Route path="/" element={<LoginPage/>}></Route>
+          <Route path="/register" element={<RegisterPage/>}></Route>
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/manage-users" element={<ManageUsers />} />
+          <Route path="/admin/manage-courses" element={<ManageCourses />} />
+          <Route path="/admin/manage-events" element={<ManageEvents />} />
+          <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
+        </Routes>
       </BrowserRouter>
-      <AdminDashboard/>
-      <StudentProfile/>
     </div>
   );
 }

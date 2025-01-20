@@ -66,7 +66,7 @@ router.post("/", async (req, res) => {
             email,
             phone,
             password: encryptedPass,
-            role: ROLE.ADMIN,  // Force role to be ADMIN
+            role: ROLE.ADMIN,  
             isactive: STATE.ACTIVE,
         });
 

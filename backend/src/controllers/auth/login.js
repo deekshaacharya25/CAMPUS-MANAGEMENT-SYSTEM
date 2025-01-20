@@ -1,12 +1,3 @@
-// import { response, Router } from "express"
-// const router = Router();
-// import userModel from "../../models/userModel.js";
-// import { RESPONSE } from "../../config/global.js";
-// import {send, setErrorRes } from "../../helper/responseHelper.js";
-// import { STATE } from "../../config/constants.js";
-// import validator from "validator";
-// import bcrypt from "bcrypt";
-// import jwt from "jsonwebtoken";
 
 import { response, Router } from "express"
 const router = Router();
@@ -61,7 +52,6 @@ router.post("/", async (req, res) => {
                 name: userData.name,
                 email: userData.email,
                 phone: userData.phone,
-                role: userData.role,
             },process.env.SECRETKEY
             );
             return send(res,RESPONSE.SUCCESS,token);
