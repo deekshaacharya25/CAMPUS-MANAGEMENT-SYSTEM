@@ -3,9 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import validator from 'validator';
 
 const LoginPage = () => {
-  const [username, setusername] = useState(''); // Combined state for email or phone
+  const [username, setUsername] = useState(''); // Combined state for email or phone
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('student'); // Default role
+  const [role, setRole] = useState(0); // Initialize role to 0
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -58,15 +58,14 @@ const LoginPage = () => {
         if (data.responseData !== undefined) {
             // Redirect based on role
             switch (role) {
-                case 'admin': // Admin role as string
+                case 1: // Admin role as number
                     navigate('/admin/dashboard'); // Redirect to Admin Dashboard
                     break;
-                case 'faculty': // Faculty role as string
-                    navigate('/faculty/dashboard');
-                    break;
-                case 'student': // Student role as string
-                default:
+                case 2: // Student role as number
                     navigate('/student/dashboard');
+                    break;
+                case 3: // Faculty role as number
+                    navigate('/faculty/dashboard');
                     break;
             }
         } else {
@@ -89,33 +88,34 @@ const LoginPage = () => {
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Role Selection */}
-                    <div className="flex justify-between mb-4">
-            {['admin', 'student', 'faculty'].map((roleType) => (
+          {/* Role Selection */}
+          <div className="flex justify-between mb-4">
+            {['admin', 'student', 'faculty'].map((roleType, index) => (
               <label
                 key={roleType}
-                className={`flex items-center cursor-pointer ${role === roleType ? 'text-bluegrey' : 'text-gray-600'}`}
+                className={`flex items-center cursor-pointer ${role === index + 1 ? 'text-bluegrey' : 'text-gray-600'}`}
               >
                 <input
                   type="radio"
                   name="role"
-                  value={roleType}
-                  checked={role === roleType}
-                  onChange={(e) => setRole(e.target.value)}
+                  value={index + 1} // Set value as number (1, 2, 3)
+                  checked={role === index + 1}
+                  onChange={(e) => setRole(Number(e.target.value))} // Ensure this updates the role correctly
                   className="mr-2 accent-bluegrey"
                 />
                 {roleType.charAt(0).toUpperCase() + roleType.slice(1)}
               </label>
             ))}
           </div>
-          {/* username Input (Email or Phone) */}
+
+          {/* Username Input */}
           <div>
             <label className="block text-sm font-medium text-gray-700 text-left">Email or Phone</label>
             <input
               type="text"
               placeholder="Enter your email or phone number"
               value={username}
-              onChange={(e) => setusername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full border border-gray-300 rounded-md px-3 py-2 mt-1 focus:ring-bluegrey focus:border-bluegrey"
               required
             />
@@ -145,7 +145,7 @@ const LoginPage = () => {
           </button>
 
           {/* Registration Link */}
-          {role === 1 && (
+          {role === 1 && ( // Check for numeric role 1 (admin)
             <div className="mt-4 text-center">
               <p className='text-sm'>Don't have an account? <Link to="/register" className='text-indigo-600 hover:text-indigo-900 transition duration-200'>Register here</Link></p>
             </div>

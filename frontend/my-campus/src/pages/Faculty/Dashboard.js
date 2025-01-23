@@ -4,6 +4,7 @@ import campus from '../../assets/campus.jpg';
 import Navbar from '../../components/Navbar';
 
 const FacultyDashboard = () => {
+  const role = 2;
   return (
     <>
     <Navbar navbarTitle="Welcome Faculty!" />

@@ -21,7 +21,7 @@ function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
             <div className="offcanvas-body">
               <ul className="navbar-nav justify-content-start flex-grow-1 pe-3">
                 <li className="nav-item">
-                  <a className="nav-link active" aria-current="page" href="#">Home</a>
+                  <a className="nav-link active" aria-current="page" href="/admin/dashboard">Home</a>
                 </li>
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -30,21 +30,26 @@ function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
                   <ul className="dropdown-menu">
                     {role === 1 && (
                       <>
-                        <li><a className="dropdown-item" href="#">Manage Users</a></li>
-                        <li><a className="dropdown-item" href="#">Manage Courses</a></li>
-                        <li><a className="dropdown-item" href="#">Manage Events</a></li>
+                        <li><a className="dropdown-item" href="/admin/manage-users">Manage Users</a></li>
+                        <li><a className="dropdown-item" href="/admin/manage-courses">Manage Courses</a></li>
+                        <li><a className="dropdown-item" href="/admin/manage-events">Manage Events</a></li>
                       </>
                     )}
                     {role === 2 && (
                       <>
-                        <li><a className="dropdown-item" href="#">View Courses</a></li>
-                        <li><a className="dropdown-item" href="#">Manage Assignments</a></li>
+                        <li><a className="dropdown-item" href="/faculty/my-profile">My Profile</a></li>
+                        <li><a className="dropdown-item" href="/faculty/assigned-courses">Assigned Courses</a></li>
+                        <li><a className="dropdown-item" href="/faculty/department">Department</a></li>
+                        <li><a className="dropdown-item" href="/faculty/send-announcements">Send Announcements</a></li>
                       </>
                     )}
                     {role === 3 && (
                       <>
-                        <li><a className="dropdown-item" href="#">View Courses</a></li>
-                        <li><a className="dropdown-item" href="#">Submit Assignments</a></li>
+                        <li><a className="dropdown-item" href="/student/my-profile">My Profile</a></li>
+                        <li><a className="dropdown-item" href="/student/view-courses">Courses</a></li>
+                        <li><a className="dropdown-item" href="/student/academic-calendar">Academic Calendar</a></li>
+                        <li><a className="dropdown-item" href="/student/direct-message">Message</a></li>
+                        <li><a className="dropdown-item" href="/student/view-announcements">Announcements</a></li>
                       </>
                     )}
                   </ul>
