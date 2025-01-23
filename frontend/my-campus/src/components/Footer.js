@@ -20,13 +20,13 @@ function Footer() {
             <h3 className="text-xl font-bold text-white mb-4 text-center">Quick Links</h3>
             <ul className="space-y-2 text-center mx-auto pr-8">
               <li>
-                <Link to="/dashboard" className="hover:text-white">Dashboard</Link>
+                <Link to="/" className="hover:text-white">Dashboard</Link>
               </li>
               <li>
                 <Link to="/about" className="hover:text-white">About Us</Link>
               </li>
               <li>
-                <Link to="/contact" className="hover:text-white">Contact</Link>
+              <a href="mailto:info@campusms.com" className="hover:text-white">Contact</a>
               </li>
             </ul>
           </div>
