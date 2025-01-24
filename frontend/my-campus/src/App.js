@@ -1,7 +1,6 @@
-
-
 //import logo from './logo.svg';
 import './App.css';
+import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import RegisterPage from './pages/RegisterPage.js';
 import LoginPage from './pages/LoginPage.js'
@@ -26,7 +25,6 @@ import AcademicCalendar from './pages/Student/AcademicCalendar';
 import DirectMessage from './pages/Student/DirectMessage.js';
 import ViewCourses from './pages/Student/ViewCourses.js';
 import ViewAnnouncements from './pages/Student/ViewAnnouncements.js';
-
 
 const App = () => {
   return (

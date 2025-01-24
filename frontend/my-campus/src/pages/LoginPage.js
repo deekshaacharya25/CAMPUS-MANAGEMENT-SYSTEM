@@ -51,26 +51,35 @@ const LoginPage = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Response data:", data);
+        console.log("Response data:", data); // Log the entire response data
+
+        // Store the token from responseData
+        if (data.responseData) {
+          localStorage.setItem("access_token", data.responseData); // Store the token in localStorage
+          console.log("Access Token set:", data.responseData); // Log the token to confirm it's set
+        } else {
+          console.error("No access token received from the server.");
+        }
+
         alert('Login successful!');
 
         // Check if role is defined
         if (data.responseData !== undefined) {
-            // Redirect based on role
-            switch (role) {
-                case 1: // Admin role as number
-                    navigate('/admin/dashboard'); // Redirect to Admin Dashboard
-                    break;
-                case 2: // Student role as number
-                    navigate('/student/dashboard');
-                    break;
-                case 3: // Faculty role as number
-                    navigate('/faculty/dashboard');
-                    break;
-            }
+          // Redirect based on role
+          switch (role) {
+            case 1: // Admin role as number
+              navigate('/admin/dashboard'); // Redirect to Admin Dashboard
+              break;
+            case 2: // Student role as number
+              navigate('/student/dashboard');
+              break;
+            case 3: // Faculty role as number
+              navigate('/faculty/dashboard');
+              break;
+          }
         } else {
-            console.error("Role is undefined in response");
-            alert("Login failed: Role is undefined");
+          console.error("Role is undefined in response");
+          alert("Login failed: Role is undefined");
         }
       } else {
         const errorData = await response.json();
@@ -143,6 +152,13 @@ const LoginPage = () => {
           >
             Login
           </button>
+
+          {/* Forgot Password Link */}
+          <div className="mt-4 text-center">
+            <Link to="/forgot-password" className="text-indigo-600 hover:text-indigo-900 transition duration-200">
+              Forgot Password?
+            </Link>
+          </div>
 
           {/* Registration Link */}
           {role === 1 && ( // Check for numeric role 1 (admin)

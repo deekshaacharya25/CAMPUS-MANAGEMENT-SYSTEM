@@ -14,12 +14,12 @@ const AdminDashboard = () => {
     <>
       <Navbar navbarTitle="Welcome Admin!" role={role} />
   
-      <DashboardLayout title="Admin Dashboard" image={campus}>
+      <DashboardLayout title="Admin Dashboard" image={campus} id="dashboard">
         <p>Simplifying Campus Life, Enhancing Every Interaction.</p>
       </DashboardLayout>
 
       {/* New Section: About Campus */}
-      <section className="about-campus py-12 bg-gray-50">
+      <section id="about-campus" className="about-campus py-12 bg-gray-50">
         <div className="container mx-auto px-6">
           <h2 className="text-3xl font-semibold text-center text-gray-800 mb-8">About Campus</h2>
           <p className="text-center text-gray-600 mb-12">

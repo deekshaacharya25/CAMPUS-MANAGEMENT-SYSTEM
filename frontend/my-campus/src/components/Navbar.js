@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaBuildingColumns } from "react-icons/fa6";
+import { Link } from 'react-router-dom';
 
 function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
   return (
@@ -21,7 +22,7 @@ function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
             <div className="offcanvas-body">
               <ul className="navbar-nav justify-content-start flex-grow-1 pe-3">
                 <li className="nav-item">
-                  <a className="nav-link active" aria-current="page" href="/admin/dashboard">Home</a>
+                  <Link to="/admin/dashboard" className="nav-link">Dashboard</Link>
                 </li>
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
