@@ -2,43 +2,40 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode"; // Ensure correct import
 import bcrypt from 'bcryptjs'; // Import bcryptjs
+import profilePicture from '../../assets/profilepicture.jpg'; // Adjust the path as necessary
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
-  const [newUser, setNewUser] = useState({ name: "", email: "", role: 3, phone: "", password: "Campus@123" });
+  const [newUser, setNewUser] = useState({ name: "", email: "", role: 3, phone: "", password: "Campus@123", image: profilePicture });
   const [editingUser, setEditingUser] = useState(null);
 
   const accessToken = localStorage.getItem("access_token");
   console.log("Access Token:", accessToken);
+
+  const fetchUsers = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    try {
+        const response = await axios.get("http://localhost:3000/api/user/list", {
+            headers: {
+                "access_token": accessToken,
+            },
+        });
+        console.log("Fetched Users:", response.data); // Log fetched users
+        if (response.data.responseCode === 200) {
+            setUsers(response.data.responseData); // Update users state
+        } else {
+            console.error("Failed to fetch users:", response.data.responseMessage);
+        }
+    } catch (error) {
+        console.error("Error fetching users:", error);
+    }
+  };
 
   useEffect(() => {
     if (!accessToken) {
       console.warn("No access token found in localStorage.");
       return;
     }
-
-    const fetchUsers = async () => {
-      const accessToken = localStorage.getItem("access_token");
-      console.log("Access Token:", accessToken); // Log the access token
-
-      try {
-        const response = await axios.get("http://localhost:3000/api/user/list", {
-          headers: {
-            "access_token": accessToken, // Send token in access_token header
-          },
-        });
-
-        console.log("Fetched Users:", response.data); // Log fetched users
-
-        if (response.data.responseCode === 200) {
-          setUsers(response.data.responseData); // Update users state
-        } else {
-          console.error("Failed to fetch users:", response.data.responseMessage);
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
 
     fetchUsers();
   }, [accessToken]);
@@ -53,13 +50,22 @@ const ManageUsers = () => {
     const accessToken = localStorage.getItem("access_token");
     console.log("Access Token for adding user:", accessToken); // Log the access token for debugging
 
-    if (accessToken) {
-      const decodedToken = jwtDecode(accessToken);
-      console.log("Decoded Token:", decodedToken); // Log the entire decoded token
-      console.log("User Role:", decodedToken.role); // Check the role
-    } else {
-      alert("No access token found.");
-      return; // Exit if no token is found
+    if (!accessToken) {
+        alert("No access token found.");
+        return; // Exit if no token is found
+    }
+
+    // Log the token before decoding
+    console.log("Access Token for decoding:", accessToken);
+
+    try {
+        const decodedToken = jwtDecode(accessToken);
+        console.log("Decoded Token:", decodedToken); // Log the entire decoded token
+        console.log("User Role:", decodedToken.role); // Check the role
+    } catch (error) {
+        console.error("Error decoding token:", error); // Log any errors during decoding
+        alert("Invalid token. Please log in again.");
+        return; // Exit if token is invalid
     }
 
     // Hash the password before sending it to the backend
@@ -82,19 +88,23 @@ const ManageUsers = () => {
 
       if (response.data.responseCode === 200) {
         const newUserData = response.data.responseData; // Extract the new user data
+        console.log("New User Data:", newUserData); // Log the new user data
         setUsers(prevUsers => [...prevUsers, newUserData]); // Update the users state with the new user
         alert("User added successfully!"); // Notify user of success
+        fetchUsers(); // Refresh the user list immediately after adding a user
       } else {
         console.error("Failed to add user:", response.data.responseMessage);
         alert(`Failed to add user: ${response.data.responseMessage}`);
       }
 
       // Reset the form or state for new user input
-      setNewUser({ name: "", email: "", phone: "", password: "Campus@123", role: 3 }); // Reset the form with default password
+      setNewUser({ name: "", email: "", phone: "", password: "Campus@123", role: 3, image: profilePicture }); // Reset the form with default values
     } catch (error) {
       console.error("Error adding user:", error);
       alert("Failed to add user. Please check your permissions.");
     }
+
+    console.log("Updated Users State:", users); // Log the updated users state
   };
 
   // Delete a user
@@ -116,7 +126,7 @@ const ManageUsers = () => {
   // Handle editing a user
   const handleEditUser = (user) => {
     setEditingUser(user);
-    setNewUser({ name: user.name, email: user.email, role: user.role, phone: user.phone, password: user.password });
+    setNewUser({ name: user.name, email: user.email, role: user.role, phone: user.phone, password: user.password, image: user.image });
   };
 
   // Save edited user
@@ -131,7 +141,7 @@ const ManageUsers = () => {
       .then((response) => {
         setUsers(users.map((user) => (user._id === editingUser._id ? response.data : user)));
         setEditingUser(null);
-        setNewUser({ name: "", email: "", role: 3, phone: "", password: "Campus@123" });
+        setNewUser({ name: "", email: "", role: 3, phone: "", password: "Campus@123", image: profilePicture });
       })
       .catch((error) => {
         console.error("Error updating user:", error);
@@ -177,8 +187,8 @@ const ManageUsers = () => {
                 <td className="border border-gray-300 p-2">{user.phone}</td>
                 <td className="border border-gray-300 p-2">{user.role}</td>
                 <td className="border border-gray-300 p-2">
-                  <button onClick={() => handleEditUser(user)} className="bg-yellow-500 text-white rounded-md p-1 hover:bg-yellow-600 transition duration-200">Edit</button>
-                  <button onClick={() => handleDeleteUser(user._id)} className="bg-red-500 text-white rounded-md p-1 hover:bg-red-600 transition duration-200 ml-2">Delete</button>
+                <button className="bg-green-500 text-white rounded p-2 mr-2 w-20">Edit</button>
+                <button className="bg-red-500 text-white rounded p-2 w-20 ">Delete</button>
                 </td>
               </tr>
             ))}
