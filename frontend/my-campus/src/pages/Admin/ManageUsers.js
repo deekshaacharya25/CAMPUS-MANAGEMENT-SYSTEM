@@ -7,7 +7,8 @@ import profilePicture from '../../assets/profilepicture.jpg'; // Adjust the path
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [newUser, setNewUser] = useState({ name: "", email: "", role: 3, phone: "", password: "Campus@123", image: profilePicture });
-  const [editingUser, setEditingUser] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   const accessToken = localStorage.getItem("access_token");
   console.log("Access Token:", accessToken);
@@ -108,44 +109,63 @@ const ManageUsers = () => {
   };
 
   // Delete a user
-  const handleDeleteUser = (id) => {
-    axios
-      .delete(`http://localhost:3000/api/user/delete?id=${id}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-      .then(() => {
-        setUsers(users.filter((user) => user._id !== id));
-      })
-      .catch((error) => {
+  const handleDeleteUser = async (userId) => {
+    const accessToken = localStorage.getItem("access_token");
+    try {
+        const response = await axios.delete(`http://localhost:3000/api/user/delete/${userId}`, {
+            headers: {
+                "access_token": accessToken,
+            },
+        });
+
+        if (response.data.responseCode === 200) {
+            alert("User deleted successfully!");
+            fetchUsers(); // Refresh the user list after deletion
+        } else {
+            alert(`Failed to delete user: ${response.data.responseMessage}`);
+        }
+    } catch (error) {
         console.error("Error deleting user:", error);
-      });
+        alert("Failed to delete user. Please try again.");
+    }
   };
 
   // Handle editing a user
   const handleEditUser = (user) => {
-    setEditingUser(user);
-    setNewUser({ name: user.name, email: user.email, role: user.role, phone: user.phone, password: user.password, image: user.image });
+    setCurrentUserId(user._id);
+    setNewUser(user);
+    setIsEditing(true);
   };
 
   // Save edited user
-  const handleSaveEdit = () => {
-    axios
-      .put(`http://localhost:3000/api/user/edit?u_id=${editingUser._id}`, newUser, {
+  const handleSaveEdit = async () => {
+    const accessToken = localStorage.getItem("access_token");
+    const hashedPassword = await bcrypt.hash(newUser.password, 10); // Hash the password
+
+    const updatedUser = {
+      ...newUser,
+      password: hashedPassword, // Use the hashed password
+    };
+
+    try {
+      const response = await axios.put(`http://localhost:3000/api/user/update/${currentUserId}`, updatedUser, {
         headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
+          "access_token": accessToken,
         },
-      })
-      .then((response) => {
-        setUsers(users.map((user) => (user._id === editingUser._id ? response.data : user)));
-        setEditingUser(null);
-        setNewUser({ name: "", email: "", role: 3, phone: "", password: "Campus@123", image: profilePicture });
-      })
-      .catch((error) => {
-        console.error("Error updating user:", error);
       });
+
+      if (response.data.responseCode === 200) {
+        alert("User updated successfully!");
+        fetchUsers(); // Refresh the user list after updating
+        setIsEditing(false); // Reset editing state
+        setNewUser({ name: "", email: "", phone: "", password: "Campus@123", role: 3, image: profilePicture }); // Reset form
+      } else {
+        alert(`Failed to update user: ${response.data.responseMessage}`);
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Failed to update user. Please try again.");
+    }
   };
 
   return (
@@ -162,7 +182,7 @@ const ManageUsers = () => {
             <option value={2}>Faculty</option>
             <option value={3}>Student</option>
           </select>
-          {editingUser ? (
+          {isEditing ? (
             <button onClick={handleSaveEdit} className="bg-green-500 text-white rounded-md p-2 hover:bg-green-600 transition duration-200">Save Changes</button>
           ) : (
             <button onClick={handleAddUser} className="bg-blue-500 text-white rounded-md p-2 hover:bg-blue-600 transition duration-200">Add User</button>
@@ -187,8 +207,8 @@ const ManageUsers = () => {
                 <td className="border border-gray-300 p-2">{user.phone}</td>
                 <td className="border border-gray-300 p-2">{user.role}</td>
                 <td className="border border-gray-300 p-2">
-                <button className="bg-green-500 text-white rounded p-2 mr-2 w-20">Edit</button>
-                <button className="bg-red-500 text-white rounded p-2 w-20 ">Delete</button>
+                <button onClick={() => handleEditUser(user)} className="bg-green-500 text-white rounded p-2 mr-2 w-20">Edit</button>
+                <button onClick={() => handleDeleteUser(user._id)} className="bg-red-500 text-white rounded p-2 w-20 ">Delete</button>
                 </td>
               </tr>
             ))}
