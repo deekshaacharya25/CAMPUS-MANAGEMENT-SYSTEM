@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-
 const ManageEvents = () => {
+  // State Management
   const [events, setEvents] = useState([]);
   const [newEvent, setNewEvent] = useState({
     title: "",
@@ -37,7 +37,7 @@ const ManageEvents = () => {
   const updateEvent = async () => {
     try {
       await axios.put(`/api/events/${editingEvent._id}`, editingEvent);
-      setEditingEvent(null);
+      setEditingEvent(null); // Reset editing state
       fetchEvents();
     } catch (error) {
       console.error("Error updating event:", error);
@@ -61,7 +61,6 @@ const ManageEvents = () => {
 
   return (
     <div className="admin-page">
-  
       <div className="admin-content">
         <h1>Manage Events</h1>
 
@@ -77,9 +76,7 @@ const ManageEvents = () => {
           <textarea
             placeholder="Event Description"
             value={newEvent.description}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, description: e.target.value })
-            }
+            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
           ></textarea>
           <input
             type="date"
@@ -90,9 +87,7 @@ const ManageEvents = () => {
             type="text"
             placeholder="Location"
             value={newEvent.location}
-            onChange={(e) =>
-              setNewEvent({ ...newEvent, location: e.target.value })
-            }
+            onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
           />
           <button onClick={addEvent}>Add Event</button>
         </div>
@@ -133,31 +128,23 @@ const ManageEvents = () => {
               type="text"
               placeholder="Event Title"
               value={editingEvent.title}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, title: e.target.value })
-              }
+              onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
             />
             <textarea
               placeholder="Event Description"
               value={editingEvent.description}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, description: e.target.value })
-              }
+              onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
             ></textarea>
             <input
               type="date"
               value={editingEvent.date}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, date: e.target.value })
-              }
+              onChange={(e) => setEditingEvent({ ...editingEvent, date: e.target.value })}
             />
             <input
               type="text"
               placeholder="Location"
               value={editingEvent.location}
-              onChange={(e) =>
-                setEditingEvent({ ...editingEvent, location: e.target.value })
-              }
+              onChange={(e) => setEditingEvent({ ...editingEvent, location: e.target.value })}
             />
             <button onClick={updateEvent}>Update Event</button>
             <button onClick={() => setEditingEvent(null)}>Cancel</button>

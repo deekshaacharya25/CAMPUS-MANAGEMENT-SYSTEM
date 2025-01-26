@@ -1,12 +1,15 @@
 import { response, Router } from "express"
 const router = Router();
 import userModel from "../../models/userModel.js";
+import mongoose from "mongoose";
 import { RESPONSE } from "../../config/global.js";
 import {send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
 import validator from "validator";
-import mongoose from "mongoose";
+import express from "express";
 import { authenticate } from "../../middlewares/authenticate.js";
+import { ROLE } from "../../config/constants.js";
+
 router.get("/", authenticate, async (req, res) => {
     try {
        
@@ -118,4 +121,39 @@ router.get("/by-faculty-id", authenticate, async (req, res) => {
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
+
+router.get("/faculties", authenticate, async (req, res) => {
+    try {
+        // Build the query
+        const query = {
+            role: 2, // Assuming role 2 corresponds to faculty
+            isactive: STATE.ACTIVE, // Fetch only active faculties
+        };
+
+        // Fetch all faculties based on the query
+        let faculties = await userModel.aggregate([
+            {
+                $match: query,
+            },
+            {
+                $project: {
+                    isactive: 0, // Exclude sensitive fields if needed
+                    __v: 0,
+                },
+            },
+        ]);
+
+        // Check if faculties exist
+        if (faculties.length === 0) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "No faculties found"));
+        }
+
+        // Return success response with faculty data
+        return send(res, RESPONSE.SUCCESS, faculties);
+    } catch (error) {
+        console.error("Error fetching faculties:", error);
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
+
 export default router;

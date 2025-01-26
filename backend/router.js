@@ -10,11 +10,13 @@ import eventApiHandler from './src/controllers/manageEvent/apiHandler.js';
 import profileApiHandler from './src/controllers/manageProfile/apiHandler.js';
 import libraryApiHandler from './src/controllers/manageLibrary/apiHandler.js';
 import messageApiHandler from './src/controllers/messaging/apiHandler.js';
+import facultyApiHandler from './src/controllers/manageUser/apiHandler.js'
 
 const routes= (app) => {
     app.use("/api/auth",apiHandler);
     app.use("/api/user", userApiHandler);
     app.use("/api/user/by-faculty-id", studentApiHandler);
+    app.use("/api/user/faculties", facultyApiHandler);
     app.use("/api/course", courseApiHandler);
     app.use("/api/department", departmentApiHandler);
     app.use("/api/event", eventApiHandler);

@@ -16,6 +16,13 @@ const departmentSchema = new mongoose.Schema({
             required: true,
         },
     ],
+    students: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "users", 
+        },
+    ],
+
     createdAt: {
         type: Date,
         default: Date.now,

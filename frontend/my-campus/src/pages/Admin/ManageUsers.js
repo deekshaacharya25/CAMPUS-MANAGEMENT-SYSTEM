@@ -110,9 +110,11 @@ const ManageUsers = () => {
 
   // Delete a user
   const handleDeleteUser = async (userId) => {
+    console.log("Attempting to delete user with ID:", userId); // Log the user ID
     const accessToken = localStorage.getItem("access_token");
     try {
-        const response = await axios.delete(`http://localhost:3000/api/user/delete/${userId}`, {
+        // Use the query parameter format for the DELETE request
+        const response = await axios.delete(`http://localhost:3000/api/user/delete?u_id=${userId}`, {
             headers: {
                 "access_token": accessToken,
             },
@@ -140,25 +142,28 @@ const ManageUsers = () => {
   // Save edited user
   const handleSaveEdit = async () => {
     const accessToken = localStorage.getItem("access_token");
-    const hashedPassword = await bcrypt.hash(newUser.password, 10); // Hash the password
-
     const updatedUser = {
       ...newUser,
-      password: hashedPassword, // Use the hashed password
+      // Hash the password if required
+      // password: await bcrypt.hash(newUser.password, 10),
     };
-
+  
     try {
-      const response = await axios.put(`http://localhost:3000/api/user/update/${currentUserId}`, updatedUser, {
-        headers: {
-          "access_token": accessToken,
-        },
-      });
-
+      const response = await axios.put(
+        `http://localhost:3000/api/user/edit/?u_id=${currentUserId}`, // Correct query param
+        updatedUser,
+        {
+          headers: {
+            "access_token": accessToken, // Ensure token is sent
+          },
+        }
+      );
+  
       if (response.data.responseCode === 200) {
         alert("User updated successfully!");
-        fetchUsers(); // Refresh the user list after updating
+        fetchUsers(); // Refresh the list
         setIsEditing(false); // Reset editing state
-        setNewUser({ name: "", email: "", phone: "", password: "Campus@123", role: 3, image: profilePicture }); // Reset form
+        setNewUser({ name: "", email: "", phone: "", password: "Campus@123", role: 3, image: profilePicture });
       } else {
         alert(`Failed to update user: ${response.data.responseMessage}`);
       }
@@ -167,11 +172,12 @@ const ManageUsers = () => {
       alert("Failed to update user. Please try again.");
     }
   };
+  
 
   return (
     <div className="admin-page p-6 bg-gray-100 min-h-screen">
       <div className="admin-content bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold mb-4">Manage Users</h1>
+        <h1 className="text-3xl font-bold mb-4">Manage Users</h1>
         <div className="add-user-form mb-6 flex flex-col md:flex-row md:items-center">
           <input type="text" placeholder="Name" value={newUser.name} onChange={(e) => setNewUser({ ...newUser, name: e.target.value })} className="border border-gray-300 rounded-md p-2 mb-2 md:mb-0 md:mr-2 flex-1" />
           <input type="email" placeholder="Email" value={newUser.email} onChange={(e) => setNewUser({ ...newUser, email: e.target.value })} className="border border-gray-300 rounded-md p-2 mb-2 md:mb-0 md:mr-2 flex-1" />

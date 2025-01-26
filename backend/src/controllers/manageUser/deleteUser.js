@@ -3,7 +3,7 @@ const router = Router();
 import userModel from "../../models/userModel.js";
 import { RESPONSE } from "../../config/global.js";
 import {send, setErrorRes } from "../../helper/responseHelper.js";
-import { STATE } from "../../config/constants.js";
+import { STATE,ROLE } from "../../config/constants.js";
 import validator from "validator";
 import mongoose from "mongoose";
 import { authenticate } from "../../middlewares/authenticate.js";

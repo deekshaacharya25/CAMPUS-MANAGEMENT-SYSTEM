@@ -17,7 +17,7 @@ router.post("/", authenticate, async (req, res) => {
     }
 
       // Extract fields from the request body
-      const { title, description, facultyId, students, createdAt} = req.body;
+      const { title, description, facultyId, createdAt} = req.body;
       const user_id = req.user.id;
 
       // Validate required fields
@@ -36,12 +36,6 @@ router.post("/", authenticate, async (req, res) => {
         return send(res, setErrorRes(RESPONSE.REQUIRED,"facultyId"));
      
     }
-    if (!students || students == undefined) {
-      
-        return send(res, setErrorRes(RESPONSE.REQUIRED,"students"));
-    }
-
-    let studentIds = students.split(",").map((studentId) => new mongoose.Types.ObjectId(studentId));
   
       const isExist = await courseModel.aggregate([
         {
@@ -60,7 +54,6 @@ router.post("/", authenticate, async (req, res) => {
         title: title,
         description: description,
         facultyId: facultyId,
-        students: studentIds,
         user_id: user_id,
         createdAt:createdAt,
       });

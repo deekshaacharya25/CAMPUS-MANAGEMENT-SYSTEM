@@ -10,7 +10,7 @@ router.put("/", async (req, res) => {
     try {
        let course_id = req.query.course_id;
 
-       let {title, description, faculty_id, students} =req.body;
+       let {title, description, faculty_id} =req.body;
        let updates= {};
        
 
@@ -49,9 +49,6 @@ router.put("/", async (req, res) => {
         if( faculty_id && faculty_id != undefined){
             updates.faculty_id = faculty_id;
         }
-        if( students && students != undefined){
-            updates.students = students;
-        }
     await courseModel.updateMany(
         { _id: course_id,
 
@@ -59,13 +56,7 @@ router.put("/", async (req, res) => {
             $set: updates,
          }
     );
-    //     await courseModel.findByIdAndUpdate({
-    //         _id: course_id,
-    //         isactive: STATE.ACTIVE,
-    //     },
-    // {
-    //     isactive: STATE.INACTIVE,
-    // });
+
     
     console.log(updates);
 
