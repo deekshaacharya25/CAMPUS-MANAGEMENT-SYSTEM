@@ -127,10 +127,10 @@ router.get("/faculties", authenticate, async (req, res) => {
         // Build the query
         const query = {
             role: 2, // Assuming role 2 corresponds to faculty
-            isactive: STATE.ACTIVE, // Fetch only active faculties
+            isactive: STATE.ACTIVE, 
         };
 
-        // Fetch all faculties based on the query
+        // Fetch all students based on the query
         let faculties = await userModel.aggregate([
             {
                 $match: query,
@@ -143,7 +143,7 @@ router.get("/faculties", authenticate, async (req, res) => {
             },
         ]);
 
-        // Check if faculties exist
+        // Check if students exist
         if (faculties.length === 0) {
             return send(res, setErrorRes(RESPONSE.NOT_FOUND, "No faculties found"));
         }
@@ -156,4 +156,37 @@ router.get("/faculties", authenticate, async (req, res) => {
     }
 });
 
+router.get("/students", authenticate, async (req, res) => {
+    try {
+        // Build the query for role 3
+        const query = {
+            role: 3, // Ensure this is set to 3 for students
+            isactive: STATE.ACTIVE, // Fetch only active students
+        };
+
+        // Fetch all students based on the query
+        let students = await userModel.aggregate([
+            {
+                $match: query,
+            },
+            {
+                $project: {
+                    isactive: 0, // Exclude sensitive fields if needed
+                    __v: 0,
+                },
+            },
+        ]);
+
+        // Check if students exist
+        if (students.length === 0) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "No students found"));
+        }
+
+        // Return success response with student data
+        return send(res, RESPONSE.SUCCESS, students);
+    } catch (error) {
+        console.error("Error fetching students:", error);
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
 export default router;
