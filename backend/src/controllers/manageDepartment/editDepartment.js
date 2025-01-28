@@ -10,7 +10,7 @@ router.put("/", async (req, res) => {
     try {
        let department_id = req.query.department_id;
 
-       let {name, description, faculties} =req.body;
+       let {name, description} =req.body;
        let updates= {};
        
 
@@ -45,10 +45,7 @@ router.put("/", async (req, res) => {
         if( description && description != undefined){
             updates.description = description;
         }
-        
-        if( faculties && faculties != undefined){
-            updates.faculties = faculties;
-        }
+    
    
     await departmentModel.updateMany(
         { _id: department_id,

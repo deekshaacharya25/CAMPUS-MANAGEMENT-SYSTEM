@@ -33,6 +33,10 @@ const userSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref: "users",
     },
+    departmentId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "departments",
+    },
     isactive: {
         type: Number,
         default: 1,

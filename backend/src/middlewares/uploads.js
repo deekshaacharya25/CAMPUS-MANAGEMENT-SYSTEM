@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
     },
 });
 
-const limit = 5 * 1024 * 1024; //5 Mb Validation
+const limit = 10 * 1024 * 1024; //10 Mb Validation
 const fileFilter = (req, file, cb) => {
     if (file.mimetype.includes("jpeg") || file.mimetype.includes("png") || file.mimetype.includes("jpg")) {
         cb(null, true);

@@ -2,6 +2,7 @@
 import { Router } from "express";
 const router = Router();
 import userModel from "../../models/userModel.js";
+import profileModel from "../../models/profileModel.js";
 import courseModel from "../../models/courseModel.js";
 import departmentModel from "../../models/departmentModel.js";
 import { RESPONSE } from "../../config/global.js";
@@ -12,55 +13,124 @@ import validator from "validator";
 router.put("/", async (req, res) => {
     try {
         let facultyId = req.query.facultyId;
-        let { name, email, phone, department } = req.body;
-        let updates = {};
+        let { 
+            email, 
+            phone,
+            department,
+            dateOfBirth,
+            // Nested objects
+            address: {
+                street,
+                city,
+                state,
+                pincode
+            } = {},
+            socialLinks: {
+                linkedin,
+                github,
+                portfolio
+            } = {},
+            skills 
+        } = req.body;
 
-        if (!facultyId || facultyId == undefined) {
+        if (!facultyId) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "facultyId"));
         }
 
-        let userData = await userModel.aggregate([
-            {
-                $match: {
-                    $expr: { $eq: ["$_id", { $toObjectId: facultyId }] },
-                    isactive: STATE.ACTIVE,
-                }
-            }
-        ]);
+        // Check if faculty exists
+        let userData = await userModel.findOne({
+            _id: facultyId,
+            isactive: STATE.ACTIVE
+        });
 
-        if (userData.length === 0) {
+        if (!userData) {
             return send(res, setErrorRes(RESPONSE.NOT_FOUND, "faculty data"));
         }
 
-        if (name && name != undefined) {
-            updates.name = name;
-        }
-
-        if (email && email != undefined) {
+        // Validate and update user fields
+        let userUpdates = {};
+        if (email) {
             if (!validator.isEmail(email)) {
                 return send(res, setErrorRes(RESPONSE.INVALID, "email format"));
             }
-            updates.email = email;
+            userUpdates.email = email;
         }
 
-        if (phone && phone != undefined) {
+        if (phone) {
             let isValidPhone = phone.toString().match(/^\+91\d{10}$/);
             if (!isValidPhone) {
                 return send(res, setErrorRes(RESPONSE.INVALID, "phone format"));
             }
-            updates.phone = phone;
+            userUpdates.phone = phone;
         }
 
-        if (department && department != undefined) {
-            updates.department = department;
+        // Update user model if needed
+        if (Object.keys(userUpdates).length > 0) {
+            await userModel.updateOne(
+                { _id: facultyId },
+                { $set: userUpdates }
+            );
         }
 
-        await userModel.updateMany(
-            { _id: facultyId },
-            { $set: updates }
+        // Handle profile updates with nested objects
+        let profileUpdates = {};
+
+        if (department) profileUpdates.department = department;
+        if (dateOfBirth) profileUpdates.dateOfBirth = dateOfBirth;
+
+        // Handle address updates
+        if (street || city || state || pincode) {
+            profileUpdates.address = {
+                ...(street && { street }),
+                ...(city && { city }),
+                ...(state && { state }),
+                ...(pincode && { pincode })
+            };
+        }
+
+        // Handle social links updates
+        if (linkedin || github || portfolio) {
+            profileUpdates.socialLinks = {
+                ...(linkedin && { linkedin }),
+                ...(github && { github }),
+                ...(portfolio && { portfolio })
+            };
+        }
+
+        if (skills) profileUpdates.skills = skills;
+
+        // Update or create profile
+        await profileModel.findOneAndUpdate(
+            { userId: facultyId },
+            { $set: profileUpdates },
+            { upsert: true, new: true }
         );
 
         return send(res, RESPONSE.SUCCESS);
+    } catch (error) {
+        console.log(error);
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
+
+// Get faculty profile
+router.get("/", async (req, res) => {
+    try {
+        let facultyId = req.query.facultyId;
+
+        if (!facultyId) {
+            return send(res, setErrorRes(RESPONSE.REQUIRED, "facultyId"));
+        }
+
+        const profile = await profileModel
+            .findOne({ userId: facultyId })
+            .populate('userId', 'name email phone image role');
+
+        if (!profile) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "faculty profile"));
+        }
+
+        return send(res, RESPONSE.SUCCESS, profile);
     } catch (error) {
         console.log(error);
         return send(res, RESPONSE.UNKNOWN_ERR);

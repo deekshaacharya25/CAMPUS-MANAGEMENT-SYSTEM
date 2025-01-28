@@ -160,8 +160,8 @@ router.get("/students", authenticate, async (req, res) => {
     try {
         // Build the query for role 3
         const query = {
-            role: 3, // Ensure this is set to 3 for students
-            isactive: STATE.ACTIVE, // Fetch only active students
+            role: 3, 
+            isactive: STATE.ACTIVE, 
         };
 
         // Fetch all students based on the query

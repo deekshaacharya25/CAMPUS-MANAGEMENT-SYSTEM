@@ -17,7 +17,7 @@ router.post("/", authenticate, async (req, res) => {
     }
 
       // Extract fields from the request body
-      const { name, description, faculties, createdAt} = req.body;
+      const { name, description, createdAt} = req.body;
       const user_id = req.user.id;
 
       // Validate required fields
@@ -31,12 +31,7 @@ router.post("/", authenticate, async (req, res) => {
         return send(res, setErrorRes(RESPONSE.REQUIRED,"description"));
      
     }
-    if (!faculties || faculties == undefined) {
-      
-        return send(res, setErrorRes(RESPONSE.REQUIRED,"faculties"));
-     
-    }
-  let facultyIds = faculties.split(",").map((facultyId) => new mongoose.Types.ObjectId(facultyId));
+
       const isExist = await departmentModel.aggregate([
         {
           $match: {
@@ -53,7 +48,6 @@ router.post("/", authenticate, async (req, res) => {
       await departmentModel.create({
         name: name,
         description: description,
-        faculties: facultyIds,
         user_id: user_id,
         createdAt:createdAt,
       });

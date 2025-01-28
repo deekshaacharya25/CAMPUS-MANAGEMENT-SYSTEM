@@ -19,7 +19,7 @@ router.post("/", authenticate, image, async (req, res) => {
     return send(res, RESPONSE.UNAUTHORIZED);
   }
 
-  const { name, email, phone, password, role } = req.body;
+  const { name, email, phone, password, role ,departmentId} = req.body;
 
   // Validate required fields
   if (!name || name == undefined) {
@@ -74,6 +74,7 @@ router.post("/", authenticate, image, async (req, res) => {
     password: encryptedPass,
     role: Number(role),
     image: images,
+    departmentId,
     isactive: STATE.ACTIVE
   });
 

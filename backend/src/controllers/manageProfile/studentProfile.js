@@ -1,59 +1,88 @@
 import { Router } from "express";
 const router = Router();
 import userModel from "../../models/userModel.js";
+import profileModel from "../../models/profileModel.js";
 import { RESPONSE } from "../../config/global.js";
 import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
-import validator from "validator";
 
 router.put("/", async (req, res) => {
     try {
         let student_id = req.query.student_id;
-        let { name, email, phone } = req.body;
-        let updates = {};
+        let { 
+            rollNo,
+            semester,
+            dateOfBirth,
+            address,
+            academicDetails,
+            socialLinks,
+            skills 
+        } = req.body;
 
         if (!student_id || student_id == undefined) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "student_id"));
         }
 
-        let userData = await userModel.aggregate([
-            {
-                $match: {
-                    $expr: { $eq: ["$_id", { $toObjectId: student_id }] },
-                    isactive: STATE.ACTIVE,
-                }
-            }
-        ]);
+        // Check if user exists
+        let userData = await userModel.findOne({
+            _id: student_id,
+            isactive: STATE.ACTIVE
+        });
 
-        if (userData.length === 0) {
+        if (!userData) {
             return send(res, setErrorRes(RESPONSE.NOT_FOUND, "student data"));
         }
 
-        if (name && name != undefined) {
-            updates.name = name;
-        }
+        // Handle profile updates with nested objects
+        let profileUpdates = {};
 
-        if (email && email != undefined) {
-            if (!validator.isEmail(email)) {
-                return send(res, setErrorRes(RESPONSE.INVALID, "email format"));
-            }
-            updates.email = email;
+       
+        if (rollNo) profileUpdates.rollNo = rollNo;
+        if (semester) profileUpdates.semester = semester;
+        if (dateOfBirth) profileUpdates.dateOfBirth = dateOfBirth;
+        if (address) profileUpdates.address = address;
+        if (academicDetails) {
+            // Convert numeric strings to numbers
+            if (academicDetails.cgpa) academicDetails.cgpa = parseFloat(academicDetails.cgpa);
+            if (academicDetails.backlogCount) academicDetails.backlogCount = parseInt(academicDetails.backlogCount);
+            if (academicDetails.admissionYear) academicDetails.admissionYear = parseInt(academicDetails.admissionYear);
+            profileUpdates.academicDetails = academicDetails;
         }
+        if (socialLinks) profileUpdates.socialLinks = socialLinks;
+        if (skills) profileUpdates.skills = skills;
 
-        if (phone && phone != undefined) {
-            let isValidPhone = phone.toString().match(/^\+91\d{10}$/);
-            if (!isValidPhone) {
-                return send(res, setErrorRes(RESPONSE.INVALID, "phone format"));
-            }
-            updates.phone = phone;
-        }
-
-        await userModel.updateMany(
-            { _id: student_id },
-            { $set: updates }
+        // Update or create profile
+        await profileModel.findOneAndUpdate(
+            { userId: student_id },
+            { $set: profileUpdates },
+            { upsert: true, new: true }
         );
 
         return send(res, RESPONSE.SUCCESS);
+    } catch (error) {
+        console.log(error);
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
+
+// Get student profile
+router.get("/", async (req, res) => {
+    try {
+        let student_id = req.query.student_id;
+
+        if (!student_id) {
+            return send(res, setErrorRes(RESPONSE.REQUIRED, "student_id"));
+        }
+
+        const profile = await profileModel
+            .findOne({ userId: student_id })
+            .populate('userId', 'name email phone image role');
+
+        if (!profile) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "student profile"));
+        }
+
+        return send(res, RESPONSE.SUCCESS, profile);
     } catch (error) {
         console.log(error);
         return send(res, RESPONSE.UNKNOWN_ERR);

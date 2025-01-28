@@ -16,7 +16,7 @@ router.put("/", authenticate, async (req, res) => {
       return send(res, setErrorRes(RESPONSE.REQUIRED, "u_id"));
     }
 
-    const { name, email, phone, role, password, image } = req.body;
+    const { name, email, phone, role, password, image, departmentId } = req.body;
     const updates = {};
 
     const userData = await userModel.aggregate([
@@ -71,6 +71,9 @@ router.put("/", authenticate, async (req, res) => {
       updates.password = password;
     }
 
+    if (!departmentId || departmentId !== undefined) {
+      updates.departmentId = departmentId;
+    }
     if (req.files && req.files.length > 0) {
       const filenames = req.files.map((file) => file.filename);
       updates.image = filenames;
