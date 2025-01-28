@@ -28,7 +28,8 @@ const MyProfile = () => {
       github: "",
       portfolio: ""
     },
-    skills: []
+    skills: [],
+    department: ""
   });
   const [selectedImage, setSelectedImage] = useState(null); // Add state for new image
   const fileInputRef = useRef(null); // Add ref for file input
@@ -257,10 +258,10 @@ const MyProfile = () => {
           <div className="space-y-4">
             {/* Basic Information */}
             <div className="border-b pb-4">
-              <h2 className="text-xl font-semibold mb-3">Basic Information</h2>
-              <p><span className="font-medium">Email:</span> {student.email}</p>
-              <p><span className="font-medium">Phone:</span> {student.phone}</p>
-              <p><span className="font-medium">Department:</span> {student.department}</p>
+              <h2 className="text-xl font-semibold mb-3 text-yellow-800">MY PROFILE</h2>
+              <p  className="text-yellow-800"><span className="font-medium text-left  text-yellow-800">Email:</span> {student.email}</p>
+              <p  className="text-yellow-800"><span className="font-medium text-left  text-yellow-800">Phone:</span> {student.phone}</p>
+              <p  className="text-yellow-800"><span className="font-medium text-left  text-yellow-800">Department:</span> {updatedProfile.department || "N/A"}</p>
             </div>
 
             {/* Academic Information */}
@@ -274,23 +275,6 @@ const MyProfile = () => {
                   <p><span className="font-medium">Admission Year:</span> {profile.academicDetails?.admissionYear}</p>
                 </div>
 
-                {/* Contact Information */}
-                <div className="border-b pb-4">
-                  <h2 className="text-xl font-semibold mb-3">Contact Information</h2>
-                  <p><span className="font-medium">Address:</span></p>
-                  <p className="ml-4">{profile.address?.street}</p>
-                  <p className="ml-4">{profile.address?.city}, {profile.address?.state}</p>
-                  <p className="ml-4">{profile.address?.pincode}</p>
-                </div>
-
-                {/* Professional Links */}
-                <div className="border-b pb-4">
-                  <h2 className="text-xl font-semibold mb-3">Professional Links</h2>
-                  <p><span className="font-medium">LinkedIn:</span> <a href={profile.socialLinks?.linkedin} className="text-blue-500 hover:underline">{profile.socialLinks?.linkedin}</a></p>
-                  <p><span className="font-medium">GitHub:</span> <a href={profile.socialLinks?.github} className="text-blue-500 hover:underline">{profile.socialLinks?.github}</a></p>
-                  <p><span className="font-medium">Portfolio:</span> <a href={profile.socialLinks?.portfolio} className="text-blue-500 hover:underline">{profile.socialLinks?.portfolio}</a></p>
-                </div>
-
                 {/* Skills */}
                 <div>
                   <h2 className="text-xl font-semibold mb-3">Skills</h2>
@@ -302,71 +286,71 @@ const MyProfile = () => {
                     ))}
                   </div>
                 </div>
+
+                {/* Address Information */}
+                <div className="border-b pb-4">
+                  <h2 className="text-xl font-semibold mb-3">Address Information</h2>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      name="street"
+                      placeholder="Street Address"
+                      value={updatedProfile.address?.street || ""}
+                      onChange={(e) => setUpdatedProfile({
+                        ...updatedProfile,
+                        address: {
+                          ...updatedProfile.address,
+                          street: e.target.value
+                        }
+                      })}
+                      className="border p-2 w-full rounded"
+                    />
+                    <input
+                      type="text"
+                      name="city"
+                      placeholder="City"
+                      value={updatedProfile.address?.city || ""}
+                      onChange={(e) => setUpdatedProfile({
+                        ...updatedProfile,
+                        address: {
+                          ...updatedProfile.address,
+                          city: e.target.value
+                        }
+                      })}
+                      className="border p-2 w-full rounded"
+                    />
+                    <input
+                      type="text"
+                      name="state"
+                      placeholder="State"
+                      value={updatedProfile.address?.state || ""}
+                      onChange={(e) => setUpdatedProfile({
+                        ...updatedProfile,
+                        address: {
+                          ...updatedProfile.address,
+                          state: e.target.value
+                        }
+                      })}
+                      className="border p-2 w-full rounded"
+                    />
+                    <input
+                      type="text"
+                      name="pincode"
+                      placeholder="Pincode"
+                      value={updatedProfile.address?.pincode || ""}
+                      onChange={(e) => setUpdatedProfile({
+                        ...updatedProfile,
+                        address: {
+                          ...updatedProfile.address,
+                          pincode: e.target.value
+                        }
+                      })}
+                      className="border p-2 w-full rounded"
+                    />
+                  </div>
+                </div>
               </>
             )}
-
-            {/* Address Information */}
-            <div className="border-b pb-4">
-              <h2 className="text-xl font-semibold mb-3">Address Information</h2>
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  name="street"
-                  placeholder="Street Address"
-                  value={updatedProfile.address?.street || ""}
-                  onChange={(e) => setUpdatedProfile({
-                    ...updatedProfile,
-                    address: {
-                      ...updatedProfile.address,
-                      street: e.target.value
-                    }
-                  })}
-                  className="border p-2 w-full rounded"
-                />
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={updatedProfile.address?.city || ""}
-                  onChange={(e) => setUpdatedProfile({
-                    ...updatedProfile,
-                    address: {
-                      ...updatedProfile.address,
-                      city: e.target.value
-                    }
-                  })}
-                  className="border p-2 w-full rounded"
-                />
-                <input
-                  type="text"
-                  name="state"
-                  placeholder="State"
-                  value={updatedProfile.address?.state || ""}
-                  onChange={(e) => setUpdatedProfile({
-                    ...updatedProfile,
-                    address: {
-                      ...updatedProfile.address,
-                      state: e.target.value
-                    }
-                  })}
-                  className="border p-2 w-full rounded"
-                />
-                <input
-                  type="text"
-                  name="pincode"
-                  placeholder="Pincode"
-                  value={updatedProfile.address?.pincode || ""}
-                  onChange={(e) => setUpdatedProfile({
-                    ...updatedProfile,
-                    address: {
-                      ...updatedProfile.address,
-                      pincode: e.target.value
-                    }
-                  })}
-                  className="border p-2 w-full rounded"
-                />
-              </div>
-            </div>
           </div>
 
           {/* Edit Button */}

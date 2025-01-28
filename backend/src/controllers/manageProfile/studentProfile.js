@@ -8,8 +8,8 @@ import { STATE } from "../../config/constants.js";
 
 router.put("/", async (req, res) => {
     try {
-        let student_id = req.query.student_id;
-        let { 
+        const student_id = req.query.student_id;
+        const { 
             rollNo,
             semester,
             dateOfBirth,
@@ -19,12 +19,12 @@ router.put("/", async (req, res) => {
             skills 
         } = req.body;
 
-        if (!student_id || student_id == undefined) {
+        if (!student_id) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "student_id"));
         }
 
         // Check if user exists
-        let userData = await userModel.findOne({
+        const userData = await userModel.findOne({
             _id: student_id,
             isactive: STATE.ACTIVE
         });
@@ -34,13 +34,20 @@ router.put("/", async (req, res) => {
         }
 
         // Handle profile updates with nested objects
-        let profileUpdates = {};
+        const profileUpdates = {};
 
-       
         if (rollNo) profileUpdates.rollNo = rollNo;
         if (semester) profileUpdates.semester = semester;
         if (dateOfBirth) profileUpdates.dateOfBirth = dateOfBirth;
-        if (address) profileUpdates.address = address;
+
+        // Check if the profile already exists
+        const existingProfile = await profileModel.findOne({ userId: student_id });
+
+        // Only set address if creating a new profile
+        if (!existingProfile && address) {
+            profileUpdates.address = address;
+        }
+
         if (academicDetails) {
             // Convert numeric strings to numbers
             if (academicDetails.cgpa) academicDetails.cgpa = parseFloat(academicDetails.cgpa);
@@ -68,7 +75,7 @@ router.put("/", async (req, res) => {
 // Get student profile
 router.get("/", async (req, res) => {
     try {
-        let student_id = req.query.student_id;
+        const student_id = req.query.student_id;
 
         if (!student_id) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "student_id"));

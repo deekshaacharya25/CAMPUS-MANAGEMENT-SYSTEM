@@ -1,6 +1,5 @@
 // facultyProfile.js
 import { Router } from "express";
-const router = Router();
 import userModel from "../../models/userModel.js";
 import profileModel from "../../models/profileModel.js";
 import courseModel from "../../models/courseModel.js";
@@ -10,35 +9,20 @@ import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
 import validator from "validator";
 
+const router = Router();
+
+// Update faculty profile
 router.put("/", async (req, res) => {
     try {
-        let facultyId = req.query.facultyId;
-        let { 
-            email, 
-            phone,
-            department,
-            dateOfBirth,
-            // Nested objects
-            address: {
-                street,
-                city,
-                state,
-                pincode
-            } = {},
-            socialLinks: {
-                linkedin,
-                github,
-                portfolio
-            } = {},
-            skills 
-        } = req.body;
+        const facultyId = req.query.facultyId;
+        const { email, phone, dateOfBirth, address, socialLinks, skills, department, street, city, state, pincode, linkedin, github, portfolio } = req.body;
 
         if (!facultyId) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "facultyId"));
         }
 
         // Check if faculty exists
-        let userData = await userModel.findOne({
+        const userData = await userModel.findOne({
             _id: facultyId,
             isactive: STATE.ACTIVE
         });
@@ -48,7 +32,7 @@ router.put("/", async (req, res) => {
         }
 
         // Validate and update user fields
-        let userUpdates = {};
+        const userUpdates = {};
         if (email) {
             if (!validator.isEmail(email)) {
                 return send(res, setErrorRes(RESPONSE.INVALID, "email format"));
@@ -57,7 +41,7 @@ router.put("/", async (req, res) => {
         }
 
         if (phone) {
-            let isValidPhone = phone.toString().match(/^\+91\d{10}$/);
+            const isValidPhone = phone.toString().match(/^\+91\d{10}$/);
             if (!isValidPhone) {
                 return send(res, setErrorRes(RESPONSE.INVALID, "phone format"));
             }
@@ -73,7 +57,7 @@ router.put("/", async (req, res) => {
         }
 
         // Handle profile updates with nested objects
-        let profileUpdates = {};
+        const profileUpdates = {};
 
         if (department) profileUpdates.department = department;
         if (dateOfBirth) profileUpdates.dateOfBirth = dateOfBirth;
@@ -108,7 +92,7 @@ router.put("/", async (req, res) => {
 
         return send(res, RESPONSE.SUCCESS);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
@@ -116,7 +100,7 @@ router.put("/", async (req, res) => {
 // Get faculty profile
 router.get("/", async (req, res) => {
     try {
-        let facultyId = req.query.facultyId;
+        const facultyId = req.query.facultyId;
 
         if (!facultyId) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "facultyId"));
@@ -132,47 +116,46 @@ router.get("/", async (req, res) => {
 
         return send(res, RESPONSE.SUCCESS, profile);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
 
+// Get courses for a faculty
 router.get("/courses", async (req, res) => {
     try {
-        let facultyId = req.query.facultyId;
+        const facultyId = req.query.facultyId;
 
-        if (!facultyId || facultyId == undefined) {
+        if (!facultyId) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "facultyId"));
         }
 
         console.log('Searching for facultyId:', facultyId);
 
-        let courses = await courseModel.find({
+        const courses = await courseModel.find({
             facultyId: facultyId,
             isactive: STATE.ACTIVE
         });
 
         console.log('Found courses:', courses);
 
-        let allCourses = await courseModel.find({});
-        console.log('All courses in DB:', allCourses);
-
         return send(res, RESPONSE.SUCCESS, courses);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
 
+// Get departments for a faculty
 router.get("/departments", async (req, res) => {
     try {
-        let facultyId = req.query.facultyId;
+        const facultyId = req.query.facultyId;
 
-        if (!facultyId || facultyId == undefined) {
+        if (!facultyId) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "facultyId"));
         }
 
-        let departments = await departmentModel.find({
+        const departments = await departmentModel.find({
             faculties: facultyId,
             isactive: STATE.ACTIVE
         });
@@ -183,7 +166,7 @@ router.get("/departments", async (req, res) => {
 
         return send(res, RESPONSE.SUCCESS, departments);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
