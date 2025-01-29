@@ -10,7 +10,7 @@ router.get("/", async (req, res) => {
     try {
         let name =req.query.name;
         let query={};
-        let department_id=req.query.id;
+        let department_id=req.query.department_id;
 
         name != undefined ? (query.name = name) : "";
         

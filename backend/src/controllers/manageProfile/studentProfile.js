@@ -6,7 +6,7 @@ import { RESPONSE } from "../../config/global.js";
 import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
 
-router.put("/", async (req, res) => {
+router.put("/add", async (req, res) => {
     try {
         const student_id = req.query.student_id;
         const { 
@@ -40,12 +40,14 @@ router.put("/", async (req, res) => {
         if (semester) profileUpdates.semester = semester;
         if (dateOfBirth) profileUpdates.dateOfBirth = dateOfBirth;
 
-        // Check if the profile already exists
-        const existingProfile = await profileModel.findOne({ userId: student_id });
-
-        // Only set address if creating a new profile
-        if (!existingProfile && address) {
-            profileUpdates.address = address;
+        if (address) {
+            // Ensure address is an object before assigning
+            profileUpdates.address = {
+                street: address.street || "",
+                city: address.city || "",
+                state: address.state || "",
+                pincode: address.pincode || ""
+            };
         }
 
         if (academicDetails) {
@@ -57,6 +59,14 @@ router.put("/", async (req, res) => {
         }
         if (socialLinks) profileUpdates.socialLinks = socialLinks;
         if (skills) profileUpdates.skills = skills;
+
+        // Check if the profile already exists
+        const existingProfile = await profileModel.findOne({ userId: student_id });
+
+        // Only set address if creating a new profile
+        if (!existingProfile && address) {
+            profileUpdates.address = address;
+        }
 
         // Update or create profile
         await profileModel.findOneAndUpdate(
@@ -73,7 +83,7 @@ router.put("/", async (req, res) => {
 });
 
 // Get student profile
-router.get("/", async (req, res) => {
+router.get("/list", async (req, res) => {
     try {
         const student_id = req.query.student_id;
 
