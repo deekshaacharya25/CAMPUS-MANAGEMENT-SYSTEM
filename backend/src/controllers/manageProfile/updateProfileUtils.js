@@ -1,4 +1,3 @@
-// updateProfile.js
 import { Router } from "express";
 const router = Router();
 
@@ -13,13 +12,9 @@ router.put("/", async (req, res) => {
     try {
         let user_id = req.query.user_id;
         let { 
-            email, 
-            phone, 
+
             role,
-            // Profile fields
             department,
-            rollNo,
-            semester,
             dateOfBirth,
             address,
             academicDetails,
@@ -48,20 +43,8 @@ router.put("/", async (req, res) => {
         // Handle user model updates
         let userUpdates = {};
 
-        if (email && email != undefined) {
-            if (!validator.isEmail(email)) {
-                return send(res, setErrorRes(RESPONSE.INVALID, "email format"));
-            }
-            userUpdates.email = email;
-        }
 
-        if (phone && phone != undefined) {
-            let isValidPhone = phone.toString().match(/^\+91\d{10}$/);
-            if (!isValidPhone) {
-                return send(res, setErrorRes(RESPONSE.INVALID, "phone format"));
-            }
-            userUpdates.phone = phone;
-        }
+
 
         // Update user model if there are changes
         if (Object.keys(userUpdates).length > 0) {
@@ -83,8 +66,6 @@ router.put("/", async (req, res) => {
 
         // Student-specific fields
         if (role === ROLE.STUDENT) {
-            if (rollNo) profileUpdates.rollNo = rollNo;
-            if (semester) profileUpdates.semester = semester;
             if (academicDetails) profileUpdates.academicDetails = academicDetails;
         }
 

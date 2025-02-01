@@ -25,6 +25,7 @@ import AcademicCalendar from './pages/Student/AcademicCalendar';
 import DirectMessage from './pages/Student/DirectMessage.js';
 import ViewCourses from './pages/Student/ViewCourses.js';
 import ViewAnnouncements from './pages/Student/ViewAnnouncements.js';
+import ResetPassword from './pages/ResetPassword.js';
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
           <Route path="/" element={<LoginPage/>}></Route>
           <Route path="/register" element={<RegisterPage/>}></Route>
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/reset-password" element={<ResetPassword/>}/>
           <Route path="/admin/manage-users" element={<ManageUsers />} />
           <Route path="/admin/manage-courses" element={<ManageCourses />} />
           <Route path="/admin/manage-events" element={<ManageEvents />} />

@@ -6,15 +6,8 @@ const profileSchema = new mongoose.Schema({
         ref: 'users',
         required: true
     },
-    rollNo: {
-        type: String,
-        required: true,
-        unique: true,
-        match: /^[A-Z]{2}\d{2}[A-Z]\d{3}$/
-    },
     semester: {
         type: Number,
-        required: true,
         min: 1,
         max: 8
     },
@@ -32,6 +25,9 @@ const profileSchema = new mongoose.Schema({
         cgpa: Number,
         backlogCount: Number,
         admissionYear: Number
+    },
+    designation:{
+        type:String
     },
     socialLinks: {
         linkedin: String,

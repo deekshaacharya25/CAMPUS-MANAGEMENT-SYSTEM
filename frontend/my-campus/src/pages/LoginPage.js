@@ -49,8 +49,10 @@ const LoginPage = () => {
         body: JSON.stringify(userData),
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json(); // Parse the response data
+
+      // Check if the response indicates a successful login
+      if (response.ok && data.responseCode === 200) {
         console.log("Response data:", data); // Log the entire response data
 
         // Store the token from responseData
@@ -82,8 +84,8 @@ const LoginPage = () => {
           alert("Login failed: Role is undefined");
         }
       } else {
-        const errorData = await response.json();
-        alert(`Login failed: ${errorData.responseMessage}`);
+        // Handle invalid login credentials
+        alert(`Login failed: ${data.responseMessage}`); // Show the error message from the server
       }
     } catch (error) {
       console.error('Error during login:', error);
@@ -155,7 +157,7 @@ const LoginPage = () => {
 
           {/* Forgot Password Link */}
           <div className="mt-4 text-center">
-            <Link to="/forgot-password" className="text-indigo-600 hover:text-indigo-900 transition duration-200">
+            <Link to="/reset-password" className="text-indigo-600 hover:text-indigo-900 transition duration-200">
               Forgot Password?
             </Link>
           </div>

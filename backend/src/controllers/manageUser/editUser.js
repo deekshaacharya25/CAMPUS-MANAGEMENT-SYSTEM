@@ -7,8 +7,8 @@ import { STATE } from "../../config/constants.js";
 import validator from "validator";
 import mongoose from "mongoose";
 import { authenticate } from "../../middlewares/authenticate.js";
-
-router.put("/", authenticate, async (req, res) => {
+import { image } from "../../middlewares/uploads.js";
+router.put("/", authenticate,image, async (req, res) => {
   try {
     const u_id = req.query.u_id;
 

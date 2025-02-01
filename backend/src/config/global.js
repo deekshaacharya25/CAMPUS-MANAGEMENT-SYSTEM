@@ -34,6 +34,10 @@ export const RESPONSE = {
     MULTER_ERR:{
         code:207,
         message: "Multer Error!",
+    },
+    INVALID_DATE:{
+        code:400,
+        message:"Invalid Date",
     }
 
     };
