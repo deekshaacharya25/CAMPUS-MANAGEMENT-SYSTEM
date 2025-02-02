@@ -26,18 +26,17 @@ const MyProfile = () => {
     department: "",
     designation: "",
   });
-  const [selectedImage, setSelectedImage] = useState(null); // Add state for new image
+  const [selectedImage, setSelectedImage] = useState(null); 
   const fileInputRef = useRef(null); // Add ref for file input
   const [showEditOption, setShowEditOption] = useState(false); // State to control edit option visibility
-  const [facultyId, setFacultyId] = useState(null); 
+
   
   const fetchProfile = async () => {
     const accessToken = localStorage.getItem("access_token");
 
-    // Check if access token is present
     if (!accessToken) {
         console.error("No access token found.");
-        alert("Please log in again."); // Alert only if the access token is missing
+        alert("Please log in again.");
         return;
     }
 
@@ -50,7 +49,7 @@ const MyProfile = () => {
             alert("Access token has expired. Please log in again.");
             return;
         }
-        facultyId = decodedToken.id; // Fetching the logged-in user's ID
+        facultyId = decodedToken.id; 
     } catch (error) {
         console.error("Failed to decode access token:", error);
         alert("Invalid access token.");
@@ -58,7 +57,6 @@ const MyProfile = () => {
     }
 
     try {
-        // Fetch user data
         const userResponse = await axios.get(`http://localhost:3000/api/user/list/faculties`, {
             headers: {
                 'access_token': accessToken,
@@ -80,68 +78,42 @@ const MyProfile = () => {
                         },
                     });
 
-                    console.log("Department Response:", departmentResponse.data); // Log the entire response
-
                     if (departmentResponse.data.responseCode === 200) {
-                        // Access the first element of the responseData array
-                        const departmentName = departmentResponse.data.responseData[0]?.name; // Use optional chaining to avoid errors
-                        console.log("Fetched Department Name:", departmentName); // Log the fetched department name
+                        
+                        const departmentName = departmentResponse.data.responseData[0]?.name;
+                        console.log("Fetched Department Name:", departmentName);
                         setUpdatedProfile(prev => ({
                             ...prev,
-                            department: departmentName || "N/A" // Set department name
+                            department: departmentName || "N/A" 
                         }));
-                    } else {
-                        console.error("Failed to fetch department data:", departmentResponse.data.responseMessage);
-                        setUpdatedProfile(prev => ({
-                            ...prev,
-                            department: "N/A" // Default to N/A if department fetch fails
-                        }));
-                    }
-                } else {
-                    setUpdatedProfile(prev => ({
-                        ...prev,
-                        department: "N/A" // Default to N/A if no departmentId
-                    }));
                 }
             }
-        } else {
-            console.error("Failed to fetch faculty data:", userResponse.data.responseMessage);
-            alert("Failed to fetch faculty data: " + userResponse.data.responseMessage);
-            return; // Exit if faculty data fetch fails
-        }
+        } 
+      }
 
-        // Fetch profile data with faculty_id
         const profileResponse = await axios.get(`http://localhost:3000/api/profile/faculty/list/?faculty_id=${facultyId}`, {
             headers: {
                 'access_token': accessToken,
             },
-            params: {
-                faculty_id: facultyId // Pass the Faculty_id as a query parameter
-            }
         });
 
-        // Check if the response indicates success
         if (profileResponse.data.responseCode === 200) {
-            const profileData = profileResponse.data.responseData;
-            setProfile(profileData);
-            setUpdatedProfile(prev => ({
-                ...prev,
-                ...profileData // Merge profile data into updatedProfile
-            }));
-        } else {
-            console.warn("Profile not found, you can add a new profile."); // Change to a warning instead of an error
-            setProfile(null); // Set profile to null to indicate no profile exists
+          const profileData = profileResponse.data.responseData;
+          if (profileData.dateOfBirth) {
+            const date = new Date(profileData.dateOfBirth);
+            profileData.dateOfBirth = date.toISOString().split('T')[0];
+          }
+          setProfile(profileData);
+          setUpdatedProfile(prev => ({
+            ...prev,
+            ...profileData
+          }));
         }
-    } catch (error) {
-        console.error("Error fetching data:", error.response ? error.response.data : error.message);
-        // Alert only for network errors or critical issues
-        if (error.response) {
-            alert("An error occurred while fetching the data: " + (error.response.data.message || "Please check your connection and try again."));
-        } else {
-            alert("An unexpected error occurred. Please try again later.");
-        }
-    }
-  };
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        alert("An error occurred while fetching the data. Please try again.");
+      }
+    };
 
   useEffect(() => {
     fetchProfile();
@@ -149,142 +121,157 @@ const MyProfile = () => {
 
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
-    setShowEditOption(false); // Hide image edit option when toggling edit mode
+    setShowEditOption(false);
   };
 
   const handleProfileChange = (e, section, field) => {
     const { value } = e.target;
-    
+  try{
     if (section) {
-      setUpdatedProfile(prev => ({
-        ...prev,
-        [section]: {
-          ...prev[section],
-          [field]: value
-        }
-      }));
+      setUpdatedProfile(prev => {
+        console.log('Previous state for section update:', prev);
+        console.log(`Updating ${section}.${field} to:`, value);
+        return {
+          ...prev,
+          [section]: {
+            ...prev[section],
+            [field]: value
+          }
+        };
+      });
     } else {
       setUpdatedProfile(prev => ({
         ...prev,
         [field]: value
       }));
     }
+  } catch (error) {
+      console.error("Error updating profile field:", error);
+      alert("Error updating field. Please try again.");
+    }
   };
 
   const handleSave = async () => {
     const accessToken = localStorage.getItem("access_token");
+
+    if (updatedProfile.dateOfBirth) {
+      const dateOfBirth = new Date(updatedProfile.dateOfBirth);
+      if (isNaN(dateOfBirth.getTime())) {
+        alert("Please enter a valid date of birth");
+        return;
+      }
+    }
+
+    const formattedDate = updatedProfile.dateOfBirth ? new Date(updatedProfile.dateOfBirth).toISOString() : null;
+
     const profileData = {
-      ...updatedProfile,
-      dateOfBirth: updatedProfile.dateOfBirth.split('-').reverse().join('-'), // Format date if needed
+      dateOfBirth: formattedDate,
+      address: updatedProfile.address,
+      socialLinks: updatedProfile.socialLinks,
+      skills: Array.isArray(updatedProfile.skills) ? updatedProfile.skills : [],
+      department: updatedProfile.department,
+      designation: updatedProfile.designation,
     };
 
     try {
-      // Update user profile with other data (excluding image)
-      await axios.put(`http://localhost:3000/api/user/edit/?u_id=${faculty._id}`, profileData, {
+
+      const response = await axios.put(`http://localhost:3000/api/profile/faculty/add?faculty_id=${faculty._id}`, profileData, {
         headers: {
-          access_token:accessToken, // Include access token in the headers
+          access_token:accessToken, 
+          'Content-Type': 'application/json'
         },
       });
 
-      // Refresh the data
-      await fetchProfile(); // Ensure this function is defined to fetch the updated profile
-      alert("Profile updated successfully!");
-      setUpdatedProfile({
-        dateOfBirth: "",
-        address: {
-          street: "",
-          city: "",
-          state: "",
-          pincode: ""
-        },
-        socialLinks: {
-          linkedin: "",
-          github: "",
-          portfolio: ""
-        },
-        skills: [],
-        department: "",
-        designation: "",
-      });
+      if (response.data.responseCode === 200) {
+        await fetchProfile();
+        setIsEditing(false);
+        alert("Profile updated successfully!");
+      } else {
+        alert("Failed to update profile: " + response.data.responseMessage);
+      }
     } catch (error) {
       console.error("Error updating profile:", error.response ? error.response.data : error.message);
       alert("Failed to update profile");
     }
   };
 
-  // Add function to handle image selection
+
   const handleImageChange = async (event) => {
-    const file = event.target.files[0]; // Get the selected file
+    const file = event.target.files[0]; 
     if (file) {
-      // Check file size (10MB in this case)
+
       if (file.size > 10 * 1024 * 1024) {
         alert("File size exceeds 10MB. Please select a smaller file.");
         return;
       }
 
       const formData = new FormData();
-      formData.append('image', file); // Append the image file to FormData
+      formData.append('image', file); 
 
-      const accessToken = localStorage.getItem("access_token"); // Retrieve the access token from local storage
+      const accessToken = localStorage.getItem("access_token"); 
 
       try {
-        // Call the endpoint to update only the profile picture
+  
         const response = await axios.put(`http://localhost:3000/api/user/edit/?u_id=${faculty._id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
-            access_token:accessToken, // Include access token in the headers
+            access_token : accessToken, // Include access token in the headers
           },
         });
 
-        console.log("Profile update response:", response.data); // Log the response
-        await fetchProfile(); // Refetch the profile to get the updated image URL
+        if (response.data.responseCode === 200) {
+          await fetchProfile();
+          alert("Profile picture updated successfully!");
+        } else {
+          alert("Failed to update profile picture: " + response.data.responseMessage);
+        }
       } catch (error) {
         console.error("Error updating profile picture:", error.response ? error.response.data : error.message);
         alert("Failed to update profile picture. Please try again."); // User-friendly error message
       }
-    } else {
-      alert("Please select an image file."); // Alert if no file is selected
-    }
+    } 
   };
 
-  // Add function to trigger file input click
   const handleImageClick = () => {
     setShowEditOption(!showEditOption); // Toggle edit option visibility
   };
 
-  const handleAddProfile = () => {
+  const handleAddProfile = (e) => {
+    e.preventDefault();
     setShowProfileForm(true);
   };
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault();
-    const accessToken = localStorage.getItem("access_token");
-    const dateParts = updatedProfile.dateOfBirth.split('-');
-    const formattedDateOfBirth = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`; // Convert to YYYY-MM-DD
     
-    const profileData = {
-        ...updatedProfile,
-        dateOfBirth: formattedDateOfBirth
-    };
+    const dateOfBirth = new Date(updatedProfile.dateOfBirth);
+    if (isNaN(dateOfBirth.getTime())) {
+      alert("Please enter a valid date of birth.");
+      return;
+    }
 
     try {
-        const response = await axios.put(`http://localhost:3000/api/profile/Faculty/add?faculty_id=${faculty._id}`, profileData, {
-            headers: {
-                'access_token': accessToken,
-            },
+        const response = await axios.put(`http://localhost:3000/api/profile/faculty/add?faculty_id=${faculty._id}`,
+        {
+          dateOfBirth: updatedProfile.dateOfBirth,
+          address: updatedProfile.address,
+          designation: updatedProfile.designation,
+          socialLinks: updatedProfile.socialLinks,
+          skills: updatedProfile.skills,
+          department: updatedProfile.department
         });
 
         if (response.data.responseCode === 200) {
+            await fetchProfile();
+            setIsEditing(false);
             alert("Profile updated successfully!");
-            fetchProfile(); // Refresh the profile data
-            setIsEditing(false); // Exit edit mode
+            setShowProfileForm(false);
         } else {
-            console.error("Failed to update profile:", response.data.responseMessage);
             alert("Failed to update profile: " + response.data.responseMessage);
         }
     } catch (error) {
-        console.error("Error updating profile:", error.response ? error.response.data : error.message);
-        alert("An error occurred while updating the profile.");
+        console.error("Error updating profile:", error);
+        alert("Failed to update profile. Please try again.");
     }
   };
 
@@ -292,7 +279,7 @@ const MyProfile = () => {
     return <p>Loading profile...</p>;
   }
 
-  // Update image URL construction
+
   const imageUrl = updatedFaculty.imagePreview || 
     (faculty?.image?.[0] ? `http://localhost:3000/uploads/${faculty.image[0]}` : ProfileImage);
 
@@ -369,27 +356,12 @@ const MyProfile = () => {
           <div className="md:w-2/3">
             {profile ? (
               <div className="space-y-6">
-                {/* Faculty Details */}
-                <div className="bg-yellow-50 p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-yellow-800 mb-3">Faculty Details</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-gray-600">
-                        <span className="font-medium text-gray-600">Specialization:</span> {profile.specialization || "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600">
-                        <span className="font-medium text-gray-600">Experience:</span> {profile.experience || "N/A"} years
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                
 
                 {/* Skills */}
                 <div className="border-b pb-4 mb-4">
                   <h2 className="text-xl font-semibold mb-3 text-yellow-800">Skills & Expertise</h2>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex  justify-center flex-wrap gap-2">
                     {profile.skills?.map((skill, index) => (
                       <span key={index} className="bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
                         {skill}
@@ -486,15 +458,6 @@ const MyProfile = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-yellow-800 mb-1">Department</label>
-                    <input
-                      type="text"
-                      value={updatedProfile.department || ''}
-                      onChange={(e) => handleProfileChange(e, null, 'department')}
-                      className="w-full border border-yellow-300 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                    />
-                  </div>
-                  <div>
                     <label className="block text-sm font-medium text-yellow-800 mb-1">Designation</label>
                     <input
                       type="text"
@@ -527,18 +490,42 @@ const MyProfile = () => {
               <div className="bg-yellow-50 p-4 rounded-lg">
                 <h3 className="text-lg font-medium text-yellow-800 mb-4">Address Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <p className="text-gray-600">
-                    <span className="font-medium text-gray-600">Street:</span> {profile.address?.street || "N/A"}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium text-gray-600">City:</span> {profile.address?.city || "N/A"}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium text-gray-600">State:</span> {profile.address?.state || "N/A"}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium text-gray-600">Pincode:</span> {profile.address?.pincode || "N/A"}
-                  </p>
+                  <div>
+                    <label className="block text-sm font-medium text-yellow-800 mb-1">Street</label>
+                    <input
+                      type="text"
+                      value={updatedProfile.address?.street || ''}
+                      onChange={(e) =>handleProfileChange(e, 'address', 'street')}
+                      className="w-full border border-yellow-300 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-yellow-800 mb-1">City</label>
+                    <input
+                      type="text"
+                      value={updatedProfile.address?.city || ''}
+                      onChange={(e) => handleProfileChange(e, 'address', 'city')}
+                      className="w-full border border-yellow-300 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-yellow-800 mb-1">State</label>
+                    <input
+                      type="text"
+                      value={updatedProfile.address?.state || ''}
+                      onChange={(e) => handleProfileChange(e, 'address', 'state')}
+                      className="w-full border border-yellow-300 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-yellow-800 mb-1">Pincode</label>
+                    <input
+                      type="text"
+                      value={updatedProfile.address?.pincode || ''}
+                      onChange={(e) =>handleProfileChange(e, 'address', 'pincode')}
+                      className="w-full border border-yellow-300 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                    />
+                  </div>
                 </div>
               </div>
 

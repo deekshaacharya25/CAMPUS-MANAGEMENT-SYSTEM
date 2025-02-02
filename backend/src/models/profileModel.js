@@ -27,7 +27,8 @@ const profileSchema = new mongoose.Schema({
         admissionYear: Number
     },
     designation:{
-        type:String
+        type:String,
+        trim: true,
     },
     socialLinks: {
         linkedin: String,

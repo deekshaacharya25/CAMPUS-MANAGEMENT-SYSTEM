@@ -14,7 +14,8 @@ router.put("/add", async (req, res) => {
             dateOfBirth,
             address,
             socialLinks,
-            skills 
+            skills,
+            designation
         } = req.body;
 
         if (!faculty_id) {
@@ -68,7 +69,8 @@ router.put("/add", async (req, res) => {
 
         if (socialLinks) profileUpdates.socialLinks = socialLinks;
         if (skills) profileUpdates.skills = skills;
-
+        if (designation) profileUpdates.designation = designation; 
+        
         // Update or create profile
         const updatedProfile = await profileModel.findOneAndUpdate(
             { userId: faculty_id },

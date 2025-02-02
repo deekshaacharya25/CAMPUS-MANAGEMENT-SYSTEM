@@ -99,11 +99,19 @@ const MyProfile = () => {
 
       if (profileResponse.data.responseCode === 200) {
         const profileData = profileResponse.data.responseData;
+        if (profileData.dateOfBirth) {
+          const date = new Date(profileData.dateOfBirth);
+          profileData.dateOfBirth = date.toISOString().split('T')[0];
+        }
         setProfile(profileData);
-        setUpdatedProfile(prev => ({
-          ...prev,
-          ...profileData
-        }));
+        setUpdatedProfile(prev => {
+          const newState = {
+            ...prev,
+            ...profileData
+          };
+          console.log('Setting updated profile:', newState);
+          return newState;
+        });
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -122,16 +130,19 @@ const MyProfile = () => {
 
   const handleProfileChange = (e, section, field) => {
     const { value } = e.target;
-    
     try {
       if (section) {
-        setUpdatedProfile(prev => ({
-          ...prev,
-          [section]: {
-            ...prev[section],
-            [field]: value
-          }
-        }));
+        setUpdatedProfile(prev => {
+          console.log('Previous state for section update:', prev);
+          console.log(`Updating ${section}.${field} to:`, value);
+          return {
+            ...prev,
+            [section]: {
+              ...prev[section],
+              [field]: value
+            }
+          };
+        });
       } else {
         setUpdatedProfile(prev => ({
           ...prev,
@@ -146,10 +157,20 @@ const MyProfile = () => {
 
   const handleSave = async () => {
     const accessToken = localStorage.getItem("access_token");
-    
+
+    if (updatedProfile.dateOfBirth) {
+      const dateOfBirth = new Date(updatedProfile.dateOfBirth);
+      if (isNaN(dateOfBirth.getTime())) {
+        alert("Please enter a valid date of birth");
+        return;
+      }
+    }
+
+    const formattedDate = updatedProfile.dateOfBirth ? new Date(updatedProfile.dateOfBirth).toISOString() : null;
+
     const profileData = {
       semester: updatedProfile.semester,
-      dateOfBirth: updatedProfile.dateOfBirth,
+      dateOfBirth: formattedDate,
       address: updatedProfile.address,
       academicDetails: {
         cgpa: Number(updatedProfile.academicDetails.cgpa),
@@ -247,7 +268,7 @@ const MyProfile = () => {
         `http://localhost:3000/api/profile/student/add?student_id=${student._id}`,
         {
           semester: updatedProfile.semester,
-          dateOfBirth: dateOfBirth.toISOString(),
+          dateOfBirth: updatedProfile.dateOfBirth,
           address: updatedProfile.address,
           academicDetails: updatedProfile.academicDetails,
           socialLinks: updatedProfile.socialLinks,
@@ -274,7 +295,6 @@ const MyProfile = () => {
     return <p>Loading profile...</p>;
   }
 
-  // Update image URL construction
   const imageUrl = updatedStudent.imagePreview || 
     (student?.image?.[0] ? `http://localhost:3000/uploads/${student.image[0]}` : ProfileImage);
 
@@ -543,7 +563,7 @@ const MyProfile = () => {
                     <input
                       type="text"
                       value={updatedProfile.address?.street || ''}
-                      onChange={(e) => handleProfileChange(e, 'address', 'street')}
+                      onChange={(e) =>handleProfileChange(e, 'address', 'street')}
                       className="w-full border border-yellow-300 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                     />
                   </div>
@@ -570,7 +590,7 @@ const MyProfile = () => {
                     <input
                       type="text"
                       value={updatedProfile.address?.pincode || ''}
-                      onChange={(e) => handleProfileChange(e, 'address', 'pincode')}
+                      onChange={(e) =>handleProfileChange(e, 'address', 'pincode')}
                       className="w-full border border-yellow-300 rounded-md p-2 focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
                     />
                   </div>
