@@ -81,12 +81,24 @@ const ManageEvents = () => {
 
   // Save edited event
   const handleSaveEdit = async () => {
-    // Check for mandatory fields
-    if (!editingEvent.title || !editingEvent.description || !editingEvent.start_date || !editingEvent.end_date || !editingEvent.type) {
-      alert("Title, Description, Start Date, End Date, and Type are mandatory.");
+    const accessToken = localStorage.getItem('access_token');
+  
+    if (!accessToken) {
+      alert('No access token found. Please login again.');
       return;
     }
-
+    // Check for mandatory fields
+    if (!editingEvent.title || !editingEvent.description || !editingEvent.start_date || !editingEvent.end_date || !editingEvent.venue || !editingEvent.type) {
+      alert("Title, Description, Start Date, End Date, Venue and Type are mandatory.");
+      return;
+    }
+    const startDate = new Date(editingEvent.start_date);
+    const endDate = new Date(editingEvent.end_date);
+    
+    if (startDate > endDate) {
+      alert("End date cannot be before start date");
+      return;
+    }
     try {
       const response = await axios.put(`http://localhost:3000/api/event/edit/?event_id=${editingEvent._id}`, editingEvent, {
         headers: {
@@ -95,8 +107,9 @@ const ManageEvents = () => {
       });
       if (response.data.responseCode === 200) {
         // Fetch events again to refresh the list
-        fetchEvents();
-        setEditingEvent(null); // Clear the editing state
+        await fetchEvents();
+        setEditingEvent(null); 
+        alert('Event updated successfully!');
       } else {
         console.error("Failed to update event:", response.data.responseMessage);
       }
@@ -107,7 +120,7 @@ const ManageEvents = () => {
 
   // Cancel editing
   const handleCancelEdit = () => {
-    setEditingEvent(null);
+    setEditingEvent(null); 
   };
 
   // Delete an event
@@ -269,101 +282,103 @@ const ManageEvents = () => {
         </tbody>
       </table>
 
-      {/* Edit Event Form */}
-      {editingEvent && (
-        <section className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">Edit Event</h2>
-          <div className="space-y-8">
-            <input
-              type="text"
-              placeholder="Event Title"
-              value={editingEvent.title}
-              onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-            <input
-              type="text"
-              placeholder="Description"
-              value={editingEvent.description}
-              onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
-            />
-            <fieldset className=" p-4 rounded-md space-y-2 m-2">
-              <legend className="text-lg font-semibold">Event Dates</legend>
-              <div className="flex items-center space-x-2">
-                <input
-                  type="date"
-                  placeholder="Start Date"
-                  value={editingEvent.start_date}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, start_date: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                />
-                <span className="mx-2">to</span>
-                <input
-                  type="date"
-                  placeholder="End Date"
-                  value={editingEvent.end_date}
-                  onChange={(e) => setEditingEvent({ ...editingEvent, end_date: e.target.value })}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
-                />
-              </div>
-            </fieldset>
-            <input
-  type="text"
-  placeholder="Venue"
-  value={newEvent.venue}
-  onChange={(e) => setNewEvent({ ...newEvent, venue: e.target.value })}
-  className="w-full px-4 py-2  border rounded-md focus:outline-none focus:ring focus:ring-gray-300 mt-4"
-/>
+     {/* Edit Event Form */}
+{editingEvent && (
+  <section className="mt-8">
+    <h2 className="text-xl font-semibold text-gray-700 mb-4">Edit Event</h2>
+    <div className="space-y-8">
+      <input
+        type="text"
+        placeholder="Event Title"
+        value={editingEvent.title}
+        onChange={(e) => setEditingEvent({ ...editingEvent, title: e.target.value })}
+        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
+      />
+      <input
+        type="text"
+        placeholder="Description"
+        value={editingEvent.description}
+        onChange={(e) => setEditingEvent({ ...editingEvent, description: e.target.value })}
+        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
+      />
+      <fieldset className="p-4 rounded-md space-y-2 m-2">
+        <legend className="text-lg font-semibold">Event Dates</legend>
+        <div className="flex items-center space-x-2">
+          <input
+            type="date"
+            placeholder="Start Date"
+            value={editingEvent.start_date}
+            onChange={(e) => setEditingEvent({ ...editingEvent, start_date: e.target.value })}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
+          />
+          <span className="mx-2">to</span>
+          <input
+            type="date"
+            placeholder="End Date"
+            value={editingEvent.end_date}
+            onChange={(e) => setEditingEvent({ ...editingEvent, end_date: e.target.value })}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300"
+          />
+        </div>
+      </fieldset>
+      <input
+        type="text"
+        placeholder="Venue"
+        value={editingEvent.venue}
+        onChange={(e) => setEditingEvent({ ...editingEvent, venue: e.target.value })}
+        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300 mt-4"
+      />
+      <select
+        value={editingEvent.type}
+        onChange={(e) => setEditingEvent({ ...editingEvent, type: e.target.value })}
+        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300 mb-4"
+      >
+        <option value="">Select Event Type</option>
+        <option value="ACADEMIC">Academic</option>
+        <option value="CAMPUS">Campus</option>
+      </select>
 
-<select
-  value={newEvent.type}
-  onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value })}
-  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-300 mb-4"
-/>
-
-{newEvent.type && (
-  <select
-    value={newEvent.category}
-    onChange={(e) => setNewEvent({ ...newEvent, category: e.target.value })}
-    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-gray-300 mb-4"
-  >
-    <option value="">Select Category</option>
-    {newEvent.type === 'ACADEMIC' ? (
-      <>
-        <option value="EXAM">Exam</option>
-        <option value="HOLIDAY">Holiday</option>
-        <option value="ASSIGNMENT">Assignment</option>
-        <option value="LECTURE">Lecture</option>
-      </>
-    ) : (
-      <>
-        <option value="CULTURAL">Cultural</option>
-        <option value="SPORTS">Sports</option>
-        <option value="WORKSHOP">Workshop</option>
-        <option value="SEMINAR">Seminar</option>
-      </>
-    )}
-  </select>
-
-            )}
-            <div>
-              <button
-                onClick={handleSaveEdit}
-                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mr-2"
-              >
-                Update Event
-              </button>
-              <button
-                onClick={handleCancelEdit}
-                className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </section>
+      {editingEvent.type && (
+        <select
+          value={editingEvent.category}
+          onChange={(e) => setEditingEvent({ ...editingEvent, category: e.target.value })}
+          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:ring-green-300 mb-4"
+        >
+          <option value="">Select Category</option>
+          {editingEvent.type === 'ACADEMIC' ? (
+            <>
+              <option value="EXAM">Exam</option>
+              <option value="HOLIDAY">Holiday</option>
+              <option value="ASSIGNMENT">Assignment</option>
+              <option value="LECTURE">Lecture</option>
+            </>
+          ) : (
+            <>
+              <option value="CULTURAL">Cultural</option>
+              <option value="SPORTS">Sports</option>
+              <option value="WORKSHOP">Workshop</option>
+              <option value="SEMINAR">Seminar</option>
+            </>
+          )}
+        </select>
       )}
+      <div>
+        <button
+          onClick={handleSaveEdit}
+          className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 mr-2"
+        >
+          Update Event
+        </button>
+        <button
+          onClick={handleCancelEdit}
+          className="px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </section>
+)}
     </div>
   );
 };

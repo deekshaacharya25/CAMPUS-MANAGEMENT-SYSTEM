@@ -44,7 +44,8 @@ const App = () => {
           <Route path="/faculty/my-profile" element={<FacultyProfile />} />
           <Route path="/faculty/assigned-courses" element={<AssignedCourses />} />
           <Route path="/faculty/department" element={<Department />} />
-           <Route path="/faculty/upload-materials" element={<UploadMaterials />} />
+           <Route path="/faculty/upload-materials" element={<UploadMaterials />}/>
+           <Route path="/faculty/manage-events" element={<ManageEvents />} />
            <Route path="/faculty/send-announcements" element={<SendAnnouncements />} />
            <Route path="/faculty/student-interaction" element={<StudentInteraction/>} />
            <Route path="/student/dashboard" element={<StudentDashboard />} />

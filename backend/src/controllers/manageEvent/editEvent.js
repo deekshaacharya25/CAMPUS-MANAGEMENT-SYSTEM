@@ -28,7 +28,7 @@ router.put("/", authenticate, async (req, res) => {
         }
 
         // Only creator or admin can edit
-        if (event.created_by.toString() !== req.user.id && req.user.role !== ROLE.ADMIN) {
+        if (event.created_by.toString() !== req.user.id && req.user.role !== ROLE.ADMIN && req.user.role !== ROLE.TEACHER) {
             return send(res, RESPONSE.UNAUTHORIZED);
         }
 
