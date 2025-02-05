@@ -9,17 +9,11 @@ const departmentSchema = new mongoose.Schema({
     description: {
         type: String,
     },
-    faculties: [
+
+    courses: [
         {
             type: Schema.Types.ObjectId,
-            ref: "users",
-            required: true,
-        },
-    ],
-    students: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: "users", 
+            ref: "courses", 
         },
     ],
 

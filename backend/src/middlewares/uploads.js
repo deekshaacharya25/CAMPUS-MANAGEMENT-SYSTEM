@@ -9,8 +9,8 @@ const storage = multer.diskStorage({
     },
 });
 
-const imageLimit = 5 * 1024 * 1024; // 5 MB
-const materialLimit = 10 * 1024 * 1024; // 10 MB
+const imageLimit = 50 * 1024 * 1024; // 50 MB
+const materialLimit = 100 * 1024 * 1024; // 100 MB
 
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|gif|webp/;
@@ -33,6 +33,5 @@ export const image = multer({
 export const material = multer({ 
     storage: storage, 
     limits: { fileSize: materialLimit }, 
-    fileFilter: fileFilter 
 }).single("file");
 

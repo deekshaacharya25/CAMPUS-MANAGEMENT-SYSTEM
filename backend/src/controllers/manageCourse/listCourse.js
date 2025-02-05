@@ -5,15 +5,16 @@ import { RESPONSE } from "../../config/global.js";
 import {send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
 import validator from "validator";
+import { authenticate } from "../../middlewares/authenticate.js";
 
-router.get("/", async (req, res) => {
+router.get("/", authenticate, async (req, res) => {
     try {
        
         // let course_id =req.params.id;
         // console.log(course_id);
         let title =req.query.title;
         let query={};
-        let course_id=req.query.id;
+        let course_id=req.query.course_id;
 
 
 

@@ -1,13 +1,12 @@
-import { Router } from "express";
-import { RESPONSE } from "../../config/global.js";
-import { send, setErrorRes } from "../../helper/responseHelper.js";
-import { ROLE, STATE } from "../../config/constants.js";
-import { authenticate } from "../../middlewares/authenticate.js";
-import { material } from "../../middlewares/uploads.js";
-import courseMaterialModel from "../../models/courseMaterialModel.js";
-import validator from 'validator';
+import express from 'express';
+import { authenticate } from '../../middlewares/authenticate.js';
+import courseMaterialModel from '../../models/courseMaterialModel.js';
+import { RESPONSE } from '../../config/global.js';
+import { STATE } from '../../config/constants.js';
+import { send, setErrorRes } from '../../helper/responseHelper.js';
 import path from 'path';
-const router = Router();
+import { material } from '../../middlewares/uploads.js';
+const router = express.Router();
 
 // Route to handle file uploads
 router.post("/upload/file", authenticate, material, async (req, res) => {
@@ -27,11 +26,10 @@ router.post("/upload/file", authenticate, material, async (req, res) => {
         const newMaterial = await courseMaterialModel.create({
             title,
             description,
-            type: "file",
-            content: `/uploads/course-materials/${file.filename}`,
+            file_url: `/uploads/${file.filename}`, // Set the file path
             file_type: path.extname(file.originalname),
             course_id,
-            user_id: req.user.id,
+            uploaded_by: req.user.id, // Set the user who is uploading the material
             isactive: STATE.ACTIVE
         });
 
@@ -63,10 +61,10 @@ router.post("/upload/pdf", authenticate, async (req, res) => {
         const newMaterial = await courseMaterialModel.create({
             title,
             description,
-            type: "pdf",
-            content: pdfUrl,
+            file_url: pdfUrl,
+            file_type: ".pdf",
             course_id,
-            user_id: req.user.id,
+            uploaded_by: req.user.id, // Set the user who is uploading the material
             isactive: STATE.ACTIVE
         });
 
@@ -99,10 +97,10 @@ router.post("/upload/video", authenticate, async (req, res) => {
         const newMaterial = await courseMaterialModel.create({
             title,
             description,
-            type: "video",
-            content: videoUrl,
+            file_url: videoUrl,
+            file_type: "video",
             course_id,
-            user_id: req.user.id,
+            uploaded_by: req.user.id, // Set the user who is uploading the material
             isactive: STATE.ACTIVE
         });
 
@@ -114,33 +112,21 @@ router.post("/upload/video", authenticate, async (req, res) => {
 });
 
 // Route to fetch all materials
-router.get("/materials", authenticate, async (req, res) => {
+router.get("/", authenticate, async (req, res) => {
     try {
-        const { course_id, type, page = 1, limit = 10 } = req.query;
+        const { course_id, type } = req.query;
 
         let query = { isactive: STATE.ACTIVE };
         if (course_id) query.course_id = course_id;
-        if (type) query.type = type;
-
-        const total = await courseMaterialModel.countDocuments(query);
+        if (type) query.file_type = type;
 
         const materials = await courseMaterialModel
             .find(query)
             .sort({ createdAt: -1 })
-            .skip((parseInt(page) - 1) * parseInt(limit))
-            .limit(parseInt(limit))
-            .populate('user_id', 'name')
+            .populate('uploaded_by', 'name')
             .populate('course_id', 'title');
 
-        return send(res, RESPONSE.SUCCESS, {
-            materials,
-            pagination: {
-                total,
-                page: parseInt(page),
-                pages: Math.ceil(total / parseInt(limit)),
-                limit: parseInt(limit)
-            }
-        });
+        return send(res, RESPONSE.SUCCESS, { materials });
     } catch (error) {
         console.error(error);
         return send(res, RESPONSE.UNKNOWN_ERR);
@@ -152,7 +138,7 @@ router.get("/download/:id", authenticate, async (req, res) => {
     try {
         const material = await courseMaterialModel.findOne({
             _id: req.params.id,
-            type: "file",
+            file_type: "file",
             isactive: STATE.ACTIVE
         });
 
@@ -160,7 +146,7 @@ router.get("/download/:id", authenticate, async (req, res) => {
             return send(res, setErrorRes(RESPONSE.NOT_FOUND, "material"));
         }
 
-        const filePath = path.join(process.cwd(), material.content);
+        const filePath = path.join(process.cwd(), 'public', material.file_url);
         res.download(filePath);
 
     } catch (error) {

@@ -33,6 +33,18 @@ router.post("/test", authenticate, async (req, res) => {
     }
 });
 
+// API endpoint to fetch notifications for the logged-in user
+router.get("/list", authenticate, async (req, res) => {
+    try {
+        const user_id = req.user.id;
+        const notifications = await notificationModel.find({ user_id: user_id, isactive: STATE.ACTIVE });
+        return send(res, RESPONSE.SUCCESS, notifications);
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
+
 // Function to check upcoming events and create notifications
 async function checkUpcomingEvents() {
     const today = new Date();
@@ -61,7 +73,7 @@ async function checkUpcomingEvents() {
                     event_id: event._id,
                     title: `Upcoming: ${event.title}`,
                     message: `You have an upcoming ${event.type.toLowerCase()} event: ${event.title} on ${event.start_date.toLocaleDateString()}`,
-                    type: event.type
+                    type: 'event'
                 });
             }
         }

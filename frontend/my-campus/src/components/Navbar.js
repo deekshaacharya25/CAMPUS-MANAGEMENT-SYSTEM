@@ -33,6 +33,7 @@ function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
                       <>
                         <li><a className="dropdown-item" href="/admin/manage-users">Manage Users</a></li>
                         <li><a className="dropdown-item" href="/admin/manage-courses">Manage Courses</a></li>
+                        <li><a className="dropdown-item" href="/admin/manage-departments">Manage Departments</a></li>
                         <li><a className="dropdown-item" href="/admin/manage-events">Manage Events</a></li>
                       </>
                     )}

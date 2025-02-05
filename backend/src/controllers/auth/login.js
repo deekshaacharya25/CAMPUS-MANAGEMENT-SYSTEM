@@ -45,7 +45,8 @@ router.post("/", async (req, res) => {
                 name: userData.name,
                 email: userData.email,
                 phone: userData.phone,
-                role: userData.role 
+                role: userData.role,
+                departmentId: userData.departmentId,
             }, process.env.SECRETKEY);
             return send(res, RESPONSE.SUCCESS, token);
         } else {

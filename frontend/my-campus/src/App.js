@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import AdminDashboard from './pages/Admin/Dashboard';
 import ManageUsers from './pages/Admin/ManageUsers';
 import ManageCourses from './pages/Admin/ManageCourses';
+import ManageDepartments from './pages/Admin/ManageDepartments';
 import ManageEvents from './pages/Admin/ManageEvents';
 import FacultyDashboard from './pages/Faculty/Dashboard';
 
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/reset-password" element={<ResetPassword/>}/>
           <Route path="/admin/manage-users" element={<ManageUsers />} />
           <Route path="/admin/manage-courses" element={<ManageCourses />} />
+          <Route path="/admin/manage-departments" element={<ManageDepartments />} />
           <Route path="/admin/manage-events" element={<ManageEvents />} />
           <Route path="/faculty/dashboard" element={<FacultyDashboard />} />
           <Route path="/student/dashboard" element={<StudentDashboard />} />

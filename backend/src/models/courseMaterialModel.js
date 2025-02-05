@@ -21,12 +21,12 @@ const courseMaterialSchema = new mongoose.Schema({
     },
     course_id: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course',
+        ref: 'courses',
         required: true
     },
     uploaded_by: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'users',
         required: true
     },
     isactive: {
