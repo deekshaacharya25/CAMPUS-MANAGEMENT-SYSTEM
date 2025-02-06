@@ -27,6 +27,8 @@ import DirectMessage from './pages/Student/DirectMessage.js';
 import ViewCourses from './pages/Student/ViewCourses.js';
 import ViewAnnouncements from './pages/Student/ViewAnnouncements.js';
 import ResetPassword from './pages/ResetPassword.js';
+import FacultyForumPost from './pages/Faculty/ForumPost.js';
+import StudentForumPost from './pages/Student/ForumPost.js';
 
 const App = () => {
   return (
@@ -48,6 +50,7 @@ const App = () => {
           <Route path="/faculty/department" element={<Department />} />
            <Route path="/faculty/upload-materials" element={<UploadMaterials />}/>
            <Route path="/faculty/manage-events" element={<ManageEvents />} />
+           <Route path="/faculty/forum-posts" element={<FacultyForumPost />}/>
            <Route path="/faculty/send-announcements" element={<SendAnnouncements />} />
            <Route path="/faculty/student-interaction" element={<StudentInteraction/>} />
            <Route path="/student/dashboard" element={<StudentDashboard />} />
@@ -55,6 +58,7 @@ const App = () => {
            <Route path="/student/view-courses" element={<ViewCourses />} />
            <Route path="/student/course-materials" element={<CourseMaterials />} />
            <Route path="/student/academic-calendar" element={<AcademicCalendar />} />
+           <Route path="/student/forum-posts" element={<StudentForumPost/>}/>
            <Route path="/student/direct-message" element={<DirectMessage/>} />
            <Route path="/student/view-announcements" element={<ViewAnnouncements />} />
         </Routes>

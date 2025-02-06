@@ -43,6 +43,7 @@ function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
                         <li><a className="dropdown-item" href="/faculty/assigned-courses">Assigned Courses</a></li>
                         <li><a className="dropdown-item" href="/faculty/department">Department</a></li>
                         <li><a className="dropdown-item" href="/faculty/manage-events">Manage Events</a></li>
+                        <li><a className="dropdown-item" href="/faculty/forum-posts">Forum Posts</a></li>
                         <li><a className="dropdown-item" href="/faculty/send-announcements">Send Announcements</a></li>
                       </>
                     )}
@@ -52,6 +53,7 @@ function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
                         <li><a className="dropdown-item" href="/student/view-courses">Courses</a></li>
                         <li><a className="dropdown-item" href="/student/academic-calendar">Academic Calendar</a></li>
                         <li><a className="dropdown-item" href="/student/direct-message">Message</a></li>
+                        <li><a className="dropdown-item" href="/student/forum-posts">Forum Posts</a></li>
                         <li><a className="dropdown-item" href="/student/view-announcements">Announcements</a></li>
                       </>
                     )}

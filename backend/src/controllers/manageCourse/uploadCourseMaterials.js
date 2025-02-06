@@ -133,12 +133,12 @@ router.get("/", authenticate, async (req, res) => {
     }
 });
 
+
 // Download route for file type materials
-router.get("/download/:id", authenticate, async (req, res) => {
+router.get("/:id", authenticate, async (req, res) => {
     try {
         const material = await courseMaterialModel.findOne({
             _id: req.params.id,
-            file_type: "file",
             isactive: STATE.ACTIVE
         });
 

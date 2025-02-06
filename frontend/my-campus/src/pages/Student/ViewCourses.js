@@ -13,7 +13,7 @@ const ViewCourses = () => {
     const token = localStorage.getItem('access_token');
     if (token) {
       const decoded = jwtDecode(token);
-      console.log('Decoded token:', decoded); // Log the decoded token to check its contents
+      console.log('Decoded token:', decoded);
       setUserDepartmentId(decoded.departmentId);
     }
   }, []);
@@ -40,11 +40,12 @@ const ViewCourses = () => {
         if (departmentArray.length > 0) {
           const department = departmentArray[0];
           console.log('Department:', department); 
-          console.log('Department Courses:', department.courses); // Log the department.courses array
+          console.log('Department Courses:', department.courses);
 
           if (department.courses && department.courses.length > 0) {
             const courses = await fetchCourses(department.courses);
-            setDepartments([{ ...department, courses }]);
+            department.courses = courses;
+            setDepartments([department]);
           } else {
             console.log('No courses found in the department');
             setDepartments([{ ...department, courses: [] }]);
@@ -78,27 +79,41 @@ const ViewCourses = () => {
           headers: { access_token: accessToken },
         });
         console.log('API Response for course:', response.data.responseData);
-        const course = response.data.responseData;
+        const course = response.data.responseData[0];
 
-        // Fetch materials for the course
         const materialsResponse = await axios.get(`http://localhost:3000/api/course/materials?course_id=${courseId}`, {
           headers: { access_token: accessToken },
         });
-        course.materials = materialsResponse.data.responseData;
+        console.log('API Response for materials:', materialsResponse.data);
+        course.materials = materialsResponse.data.responseData.materials;
         console.log('Fetched materials for course:', course.materials);
 
         courseDetails.push(course);
       }
       console.log('Fetched course details:', courseDetails);
-      return courseDetails.flat(); // Flatten the array if nested arrays are returned
+      return courseDetails;
     } catch (error) {
       console.error('Error fetching courses:', error);
       return [];
     }
   };
 
+  const getEmbedUrl = (url) => {
+    try {
+      const urlObj = new URL(url);
+      let videoId = urlObj.searchParams.get("v");
+      if (!videoId && urlObj.hostname === "youtu.be") {
+        videoId = urlObj.pathname.slice(1);
+      }
+      return `https://www.youtube.com/embed/${videoId}`;
+    } catch (error) {
+      console.error("Invalid YouTube URL:", url);
+      return "";
+    }
+  };
+
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-8xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-yellow-800">My Courses</h1>
@@ -119,8 +134,8 @@ const ViewCourses = () => {
                 <div key={course._id} className="border border-yellow-100 rounded-lg p-4 hover:bg-yellow-50 transition-colors">
                   <div className="space-y-4">
                     <div className="border-l-4 border-yellow-200 pl-4">
-                      <h4 className="text-md font-semibold text-yellow-800 mb-2">{course.title}</h4>
-                      <p className="text-sm text-gray-500 mb-2">
+                      <h4 className="text-3xl font-semibold text-yellow-800 mb-2 text-left">{course.title}</h4>
+                      <p className="text-sm text-gray-500 mb-2 text-left">
                         {course.description?.length > 150 && expandedCourse !== course._id
                           ? `${course.description.substring(0, 150)}...`
                           : course.description}
@@ -134,23 +149,41 @@ const ViewCourses = () => {
                         </button>
                       )}
                       <div className="mt-4">
-                        <h5 className="text-sm font-semibold text-yellow-800 mb-2">Course Materials</h5>
+                        <h5 className="text-sm font-semibold text-yellow-800 mb-2 text-left">Course Materials</h5>
                         {course.materials?.length > 0 ? (
                           <ul className="space-y-2">
                             {course.materials.map((material) => (
-                              <li key={material._id} className="text-sm">
-                                <a href={`http://localhost:3000/api/course/download/${material._id}`} target="_blank" rel="noopener noreferrer" 
-                                   className="text-yellow-600 hover:text-yellow-700 font-medium">
-                                  {material.title}
-                                </a>
-                                {material.description && (
-                                  <p className="text-gray-500 mt-1">{material.description}</p>
+                              <li key={material._id} className="text-sm text-left">
+                                {material.file_type === "video" ? (
+                                  <>
+                                    🎥{" "}
+                                    <div className="my-4">
+                                      <iframe
+                                        width="560"
+                                        height="315"
+                                        src={getEmbedUrl(material.file_url)}
+                                        title="YouTube video"
+                                        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                      ></iframe>
+                                    </div>
+                                    - Uploaded on {new Date(material.createdAt).toLocaleDateString()}
+                                  </>
+                                ) : (
+                                  <>
+                                    📄 <strong>{material.title}</strong> - Uploaded on{" "}
+                                    {new Date(material.createdAt).toLocaleDateString()}
+                                    <a href={material.file_url} target="_blank" rel="noopener noreferrer" 
+                                      className="text-yellow-600 hover:text-yellow-700 font-medium ml-2">
+                                      Download
+                                    </a>
+                                  </>
                                 )}
                               </li>
                             ))}
                           </ul>
                         ) : (
-                          <p className="text-sm text-gray-500">No materials available yet.</p>
+                          <p className="text-sm text-gray-500 text-left">No materials available yet.</p>
                         )}
                       </div>
                     </div>
