@@ -33,7 +33,6 @@ const forumPostSchema = new mongoose.Schema({
         },
         caption: {
             type: String,
-            required: true
         },
         image: {
             type: String,

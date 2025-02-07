@@ -75,7 +75,7 @@ router.get("/posts", async (req, res) => {
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(parseInt(limit))
-            .populate('author_id', 'name email')
+            .populate('author_id', '_id name email')
             .populate('comments.user_id', 'name email');
 
         return send(res, RESPONSE.SUCCESS, posts);
@@ -91,10 +91,6 @@ router.post("/comment", authenticate, upload.single("image"), async (req, res) =
         const { caption } = req.body;
         const { post_id } = req.query;
 
-        if (!caption) {
-            return send(res, setErrorRes(RESPONSE.REQUIRED, "caption"));
-        }
-
         if (!post_id || post_id == undefined) {
             return send(res, setErrorRes(RESPONSE.REQUIRED, "post_id"));
         }
@@ -105,9 +101,11 @@ router.post("/comment", authenticate, upload.single("image"), async (req, res) =
 
         const comment = {
             user_id: req.user.id,
-            caption: caption,
+            caption: caption || "", // Allow empty caption
             image: req.file ? req.file.filename : undefined
         };
+
+        console.log('Adding comment to post:', post_id, comment);
 
         const updatedPost = await forumPostModel.findOneAndUpdate(
             {
@@ -128,13 +126,42 @@ router.post("/comment", authenticate, upload.single("image"), async (req, res) =
             return send(res, setErrorRes(RESPONSE.NOT_FOUND, "post"));
         }
 
-        return send(res, RESPONSE.SUCCESS, updatedPost);
+        return send(res, RESPONSE.SUCCESS, updatedPost.comments);
 
     } catch (error) {
-        console.error(error);
+        console.error('Error submitting comment:', error);
         if (error instanceof multer.MulterError) {
             return send(res, setErrorRes(RESPONSE.INVALID, "File upload error"));
         }
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
+
+// Delete a forum post
+router.delete("/delete/:postId", authenticate, async (req, res) => {
+    try {
+        const { postId } = req.params;
+        const userId = req.user.id;
+
+        if (!mongoose.Types.ObjectId.isValid(postId)) {
+            return send(res, setErrorRes(RESPONSE.INVALID, "post_id"));
+        }
+
+        const post = await forumPostModel.findById(postId);
+
+        if (!post) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "post"));
+        }
+
+        if (post.author_id.toString() !== userId) {
+            return send(res, setErrorRes(RESPONSE.UNAUTHORIZED, "You are not authorized to delete this post"));
+        }
+
+        await forumPostModel.findByIdAndDelete(postId);
+
+        return send(res, RESPONSE.SUCCESS, "Post deleted successfully");
+    } catch (error) {
+        console.error('Error deleting post:', error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });

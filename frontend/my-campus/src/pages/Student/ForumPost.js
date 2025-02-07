@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {jwtDecode} from 'jwt-decode';
+import { CiTrash } from 'react-icons/ci';
 
 function ForumPost() {
   const [posts, setPosts] = useState([]);
@@ -7,6 +9,8 @@ function ForumPost() {
   const [newComment, setNewComment] = useState({ postId: '', caption: '', image: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const accessToken = localStorage.getItem('access_token');
+  const userId = accessToken ? jwtDecode(accessToken).id : null; // Decode the token to get the user ID
 
   useEffect(() => {
     fetchPosts();
@@ -14,7 +18,11 @@ function ForumPost() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/api/message/forum/posts');
+      console.log('Fetching posts...');
+      const response = await axios.get('http://localhost:3000/api/message/forum/posts', {
+        headers: { 'access_token': accessToken }
+      });
+      console.log('Posts fetched:', response.data.responseData);
       setPosts(response.data.responseData);
       setLoading(false);
     } catch (error) {
@@ -33,10 +41,19 @@ function ForumPost() {
     newPost.images.forEach((image) => formData.append('images', image));
 
     try {
-      const response = await axios.post('http://localhost:3000/api/forum/create', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      console.log('Submitting post...', newPost);
+      const response = await axios.post('http://localhost:3000/api/message/forum/create', formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'access_token': accessToken
+        },
       });
-      setPosts([response.data.responseData, ...posts]);
+      console.log('Post submitted:', response.data.responseData);
+      if (response.data.responseData && response.data.responseData._id) {
+        setPosts([response.data.responseData, ...posts]);
+      } else {
+        console.error('Post submission failed:', response.data);
+      }
       setNewPost({ title: '', caption: '', category: '', images: [] });
     } catch (error) {
       console.error('Error submitting post:', error);
@@ -51,11 +68,16 @@ function ForumPost() {
     formData.append('image', newComment.image);
 
     try {
-      const response = await axios.post(`http://localhost:3000/api/forum/comment?post_id=${postId}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      console.log('Submitting comment...', { postId, caption: newComment.caption, image: newComment.image });
+      const response = await axios.post(`http://localhost:3000/api/message/forum/comment?post_id=${postId}`, formData, {
+        headers: { 
+          'Content-Type': 'multipart/form-data',
+          'access_token': accessToken
+        },
       });
+      console.log('Comment submitted:', response.data.responseData);
       const updatedPosts = posts.map((post) =>
-        post._id === postId ? response.data.responseData : post
+        post._id === postId ? { ...post, comments: response.data.responseData } : post
       );
       setPosts(updatedPosts);
       setNewComment({ postId: '', caption: '', image: null });
@@ -69,8 +91,26 @@ function ForumPost() {
     setNewPost({ ...newPost, images: [...e.target.files] });
   };
 
-  const handleCommentImageChange = (e) => {
-    setNewComment({ ...newComment, image: e.target.files[0] });
+  const handleCommentImageChange = (e, postId) => {
+    setNewComment({ ...newComment, image: e.target.files[0], postId });
+  };
+
+  const handleDeletePost = async (postId) => {
+    try {
+      console.log('Deleting post...', postId);
+      await axios.delete(`http://localhost:3000/api/message/forum/delete/${postId}`, {
+        headers: { 'access_token': accessToken }
+      });
+      setPosts(posts.filter(post => post._id !== postId));
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      setError('Failed to delete post');
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
@@ -91,13 +131,17 @@ function ForumPost() {
           className="w-full p-2 border rounded mb-2"
           placeholder="Caption"
         />
-        <input
-          type="text"
+        <select
           value={newPost.category}
           onChange={(e) => setNewPost({ ...newPost, category: e.target.value })}
           className="w-full p-2 border rounded mb-2"
-          placeholder="Category"
-        />
+        >
+          <option value="">Select Category</option>
+          <option value="General">General</option>
+          <option value="Events">Events</option>
+          <option value="Announcements">Announcements</option>
+          <option value="Questions">Questions</option>
+        </select>
         <input
           type="file"
           multiple
@@ -121,10 +165,10 @@ function ForumPost() {
             <p className="text-center text-gray-500 py-8">No posts found.</p>
           ) : (
             posts.map((post) => (
-              <div key={post._id} className="border border-yellow-100 rounded-lg p-4 hover:bg-yellow-50 transition-colors">
+              <div key={post._id} className="border border-yellow-100 rounded-lg p-4 hover:bg-yellow-50 transition-colors relative">
                 <h2 className="text-lg font-semibold text-yellow-800">{post.title}</h2>
                 <p className="text-sm text-gray-800">{post.caption}</p>
-                <p className="text-xs text-gray-500 mt-2">Posted on {new Date(post.createdAt).toLocaleDateString()}</p>
+                <p className="text-xs text-gray-500 mt-2">Posted on {formatDate(post.createdAt)}</p>
                 {post.images && post.images.length > 0 && (
                   <div className="mt-2">
                     {post.images.map((image, index) => (
@@ -132,6 +176,20 @@ function ForumPost() {
                     ))}
                   </div>
                 )}
+                {post.author_id && (() => {
+                  console.log("Logged-in User ID:", userId);
+                  console.log("Post Author ID:", post.author_id);
+
+                  return (post.author_id._id || post.author_id.toString()) === userId;
+                })() && (
+                  <button
+                    onClick={() => handleDeletePost(post._id)}
+                    className="absolute text-2xl top-2 right-2 text-red-600 hover:text-red-800"
+                  >
+                    <CiTrash />
+                  </button>
+                )}
+
                 <form onSubmit={(e) => handleCommentSubmit(e, post._id)} className="mt-4">
                   <textarea
                     value={newComment.caption}
@@ -141,7 +199,7 @@ function ForumPost() {
                   />
                   <input
                     type="file"
-                    onChange={handleCommentImageChange}
+                    onChange={(e) => handleCommentImageChange(e, post._id)}
                     className="w-full p-2 border rounded mb-2"
                   />
                   <button type="submit" className="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
@@ -157,7 +215,7 @@ function ForumPost() {
                         {comment.image && (
                           <img src={`http://localhost:3000/uploads/${comment.image}`} alt="Comment" className="w-full h-auto mt-2" />
                         )}
-                        <p className="text-xs text-gray-500 mt-2">Commented on {new Date(comment.createdAt).toLocaleDateString()}</p>
+                        <p className="text-xs text-gray-500 mt-2">Commented on {formatDate(comment.createdAt)}</p>
                       </div>
                     ))}
                   </div>
