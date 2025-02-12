@@ -26,11 +26,10 @@ router.post("/send", authenticate, async (req, res) => {
 
         return send(res, RESPONSE.SUCCESS, newMessage);
     } catch (error) {
-        console.error(error);
+        console.error('Error sending message:', error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
-
 
 // Get conversation with specific user
 router.get("/conversation", authenticate, async (req, res) => {
@@ -45,6 +44,9 @@ router.get("/conversation", authenticate, async (req, res) => {
             return send(res, setErrorRes(RESPONSE.INVALID, "userId"));
         }
 
+        console.log('Fetching conversation for userId:', userId);
+        console.log('Current userId:', req.user.id);
+
         const messages = await messageModel.find({
             $or: [
                 { sender_id: req.user.id, receiver_id: userId },
@@ -56,9 +58,11 @@ router.get("/conversation", authenticate, async (req, res) => {
         .populate('sender_id', 'name email')
         .populate('receiver_id', 'name email');
 
+        console.log('Fetched messages:', messages);
+
         return send(res, RESPONSE.SUCCESS, messages);
     } catch (error) {
-        console.error(error);
+        console.error('Error fetching conversation:', error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
@@ -98,48 +102,46 @@ router.get("/conversations", authenticate, async (req, res) => {
             { $limit: parseInt(limit) }
         ]);
 
+        console.log('Fetched conversations:', conversations);
+
         return send(res, RESPONSE.SUCCESS, conversations);
     } catch (error) {
-        console.error(error);
+        console.error('Error fetching conversations:', error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
-
 
 // Mark message as read
 router.put("/read", authenticate, async (req, res) => {
+    const { messageIds } = req.body;
+    const userId = req.user.id; // Get the current user's ID
+
+    if (!messageIds || !Array.isArray(messageIds)) {
+        return send(res, setErrorRes(RESPONSE.REQUIRED, "messageIds (array)"));
+    }
+
     try {
-        const { message_id } = req.query;
+        console.log('Marking messages as read for userId:', userId);
+        console.log('Message IDs:', messageIds);
 
-        if (!message_id || message_id == undefined) {
-            return send(res, setErrorRes(RESPONSE.REQUIRED, "message_id"));
-        }
+        // Update the 'isRead' field for the specified messages in your database
+        // where the current user is the recipient
+        const updatedMessages = await messageModel.updateMany(
+            {
+                _id: { $in: messageIds },
+                receiver_id: userId, // Only update if current user is the receiver
+                isactive: STATE.ACTIVE
+            },
+            { $set: { isRead: true } }
+        );
 
-        if (!mongoose.Types.ObjectId.isValid(message_id)) {
-            return send(res, setErrorRes(RESPONSE.INVALID, "message_id"));
-        }
+        console.log('Updated messages:', updatedMessages);
 
-        // Find and update the message
-        const message = await messageModel.findOne({
-            _id: message_id,
-            receiver_id: req.user.id,  // Ensure the current user is the receiver
-            isactive: STATE.ACTIVE
-        });
-
-        if (!message) {
-            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "message"));
-        }
-
-        // Update isRead status
-        message.isRead = true;
-        await message.save();
-
-        return send(res, RESPONSE.SUCCESS);
-
+        return send(res, RESPONSE.SUCCESS, updatedMessages);
     } catch (error) {
-        console.error(error);
+        console.error('Error marking messages as read:', error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
 
-export default router; 
+export default router;

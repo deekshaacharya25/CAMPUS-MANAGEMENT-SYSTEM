@@ -1,33 +1,27 @@
-import { response, Router } from "express"
+import { response, Router } from "express";
 const router = Router();
 import courseModel from "../../models/courseModel.js";
 import { RESPONSE } from "../../config/global.js";
-import {send, setErrorRes } from "../../helper/responseHelper.js";
+import { send, setErrorRes } from "../../helper/responseHelper.js";
 import { STATE } from "../../config/constants.js";
 import validator from "validator";
 import { authenticate } from "../../middlewares/authenticate.js";
 
+// Existing route for listing courses with various query parameters
 router.get("/", authenticate, async (req, res) => {
     try {
-       
-        // let course_id =req.params.id;
-        // console.log(course_id);
-        let title =req.query.title;
-        let query={};
-        let course_id=req.query.course_id;
+        let title = req.query.title;
+        let course_id = req.query.course_id;
+        let facultyId = req.query.facultyId;
+        let query = {};
 
+        if (title) query.title = title;
+        if (course_id) query.$expr = { $eq: ["$_id", { $toObjectId: course_id }] };
+        if (facultyId) query.facultyId = facultyId;
 
-
-        title != undefined ? (query.title = title) : "";
-        
-        course_id != undefined
-        ? (query.$expr = { $eq : ["$_id", {$toObjectId: course_id}]})
-        : "";
-
-        console.log(query);
+        console.log("Query:", query);
         let courseData = await courseModel.aggregate([
             {
-
                 $match: query,
             },
             {
@@ -38,18 +32,35 @@ router.get("/", authenticate, async (req, res) => {
             },
         ]);
 
-        if(courseData.length==0){
-            return setErrorRes(res, setErrorRes(RESPONSE.NOT_FOUND, "course Data"));
-        }
-        courseData = (courseData || []).map((itm) => ({
-            ...itm,
-          }));
-          
+        console.log("Course Data:", courseData);
 
-        return send(res,RESPONSE.SUCCESS,courseData);
+        if (courseData.length == 0) {
+            return setErrorRes(res, RESPONSE.NOT_FOUND, "course Data");
+        }
+
+        return send(res, RESPONSE.SUCCESS, courseData);
     } catch (error) {
-        console.log(error);
+        console.error("Error:", error);
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
+
+router.get("/by-faculty", authenticate, async (req, res) => {
+    try {
+        const facultyId = req.query.facultyId;
+        console.log(`Fetching courses for facultyId: ${facultyId}`);
+        let courseData = await courseModel.find({ facultyId }).select('-isactive -__v');
+        console.log("Course Data:", courseData);
+
+        if (courseData.length == 0) {
+            return setErrorRes(res, RESPONSE.NOT_FOUND, "course Data");
+        }
+
+        return send(res, RESPONSE.SUCCESS, courseData);
+    } catch (error) {
+        console.error("Error:", error);
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
+
 export default router;

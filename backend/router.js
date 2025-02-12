@@ -12,7 +12,7 @@ import libraryApiHandler from './src/controllers/manageLibrary/apiHandler.js';
 import messageApiHandler from './src/controllers/messaging/apiHandler.js';
 import facultyApiHandler from './src/controllers/manageUser/apiHandler.js'
 import allStudentsApiHandler from './src/controllers/manageUser/apiHandler.js'
-
+import facultyCourseApiHandler from './src/controllers/manageCourse/apiHandler.js';
 const routes= (app) => {
     app.use("/api/auth",apiHandler);
     app.use("/api/user", userApiHandler);
@@ -20,6 +20,7 @@ const routes= (app) => {
     app.use("/api/user/faculties", facultyApiHandler);
     app.use("/api/user/students", allStudentsApiHandler);
     app.use("/api/course", courseApiHandler);
+    app.use("/api/course/by-faculty", facultyCourseApiHandler);
     app.use("/api/department", departmentApiHandler);
     app.use("/api/event", eventApiHandler);
     app.use("/api/profile", profileApiHandler);

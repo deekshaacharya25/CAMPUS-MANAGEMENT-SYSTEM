@@ -18,12 +18,11 @@ import StudentProfile from './pages/Student/Profile.js';
 import AssignedCourses from './pages/Faculty/AssignedCourses.js';
 import UploadMaterials from './pages/Faculty/UploadMaterials.js';
 import SendAnnouncements from './pages/Faculty/SendAnnouncements.js';
-import StudentInteraction from './pages/Faculty/StudentInteraction.js';
-import Department from './pages/Faculty/Department.js';
+import FacultyDirectMessage from './pages/Faculty/StudentInteraction.js';
 import StudentDashboard from './pages/Student/Dashboard';
 import CourseMaterials from './pages/Student/CourseMaterials';
 import AcademicCalendar from './pages/Student/AcademicCalendar';
-import DirectMessage from './pages/Student/DirectMessage.js';
+import StudentDirectMessage from './pages/Student/DirectMessage.js';
 import ViewCourses from './pages/Student/ViewCourses.js';
 import ViewAnnouncements from './pages/Student/ViewAnnouncements.js';
 import ResetPassword from './pages/ResetPassword.js';
@@ -47,19 +46,18 @@ const App = () => {
           <Route path="/student/dashboard" element={<StudentDashboard />} />
           <Route path="/faculty/my-profile" element={<FacultyProfile />} />
           <Route path="/faculty/assigned-courses" element={<AssignedCourses />} />
-          <Route path="/faculty/department" element={<Department />} />
            <Route path="/faculty/upload-materials" element={<UploadMaterials />}/>
+           <Route path="/faculty/direct-message" element={<FacultyDirectMessage/>} />
            <Route path="/faculty/manage-events" element={<ManageEvents />} />
            <Route path="/faculty/forum-posts" element={<FacultyForumPost />}/>
            <Route path="/faculty/send-announcements" element={<SendAnnouncements />} />
-           <Route path="/faculty/student-interaction" element={<StudentInteraction/>} />
            <Route path="/student/dashboard" element={<StudentDashboard />} />
            <Route path="/student/my-profile" element={<StudentProfile />} />
            <Route path="/student/view-courses" element={<ViewCourses />} />
            <Route path="/student/course-materials" element={<CourseMaterials />} />
            <Route path="/student/academic-calendar" element={<AcademicCalendar />} />
            <Route path="/student/forum-posts" element={<StudentForumPost/>}/>
-           <Route path="/student/direct-message" element={<DirectMessage/>} />
+           <Route path="/student/direct-message" element={<StudentDirectMessage/>} />
            <Route path="/student/view-announcements" element={<ViewAnnouncements />} />
         </Routes>
       </BrowserRouter>

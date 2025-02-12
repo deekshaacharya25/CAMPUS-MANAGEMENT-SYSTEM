@@ -2,7 +2,7 @@ import express from 'express';
 import { authenticate } from '../../middlewares/authenticate.js';
 import courseMaterialModel from '../../models/courseMaterialModel.js';
 import { RESPONSE } from '../../config/global.js';
-import { STATE } from '../../config/constants.js';
+import { STATE , ROLE} from '../../config/constants.js';
 import { send, setErrorRes } from '../../helper/responseHelper.js';
 import path from 'path';
 import { material } from '../../middlewares/uploads.js';
