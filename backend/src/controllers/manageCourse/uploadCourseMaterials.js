@@ -6,6 +6,8 @@ import { STATE , ROLE} from '../../config/constants.js';
 import { send, setErrorRes } from '../../helper/responseHelper.js';
 import path from 'path';
 import { material } from '../../middlewares/uploads.js';
+import validator from 'validator';
+
 const router = express.Router();
 
 // Route to handle file uploads

@@ -1,0 +1,184 @@
+campus-management-system/
+├── frontend/                  # Frontend Directory
+│   ├── react-app/             # React App (Frontend Root)
+│   │   ├── public/            # Public Folder for Static Files
+│   │   │   ├── index.html
+│   │   │   ├── favicon.ico
+│   │   │   └── manifest.json
+│   │   ├── src/               # React Source Files
+│   │   │   ├── components/    # Reusable React Components
+│   │   │   │   ├── Navbar.js
+│   │   │   │   ├── Sidebar.js
+│   │   │   │   └── Footer.js
+│   │   │   ├── pages/         # React Pages
+│   │   │   │   ├── AdminDashboard.js
+│   │   │   │   ├── FacultyDashboard.js
+│   │   │   │   ├── StudentDashboard.js
+│   │   │   │   ├── LoginPage.js
+│   │   │   │   └── RegisterPage.js
+│   │   │   ├── styles/        # CSS or Tailwind Styles
+│   │   │   │   └── global.css
+│   │   │   ├── App.js
+│   │   │   ├── index.js
+│   │   │   └── tailwind.config.js
+│   │   ├── package.json
+│   │   ├── package-lock.json
+│   │   └── README.md
+├── backend/                   # Backend Directory
+│   ├── public/                # Public Files for Uploads
+│   │   └── uploads/
+│   ├── src/                   # Backend Source Code
+│   │   ├── config/            # Configuration Files
+│   │   │   ├── constants.js
+│   │   │   └── global.js
+│   │   ├── controllers/       # API Controllers
+│   │   │   ├── auth/
+│   │   │   │   ├── login.js
+│   │   │   │   └── register.js
+│   │   │   ├── manageStudents/
+│   │   │   │   ├── addStudent.js
+│   │   │   │   ├── deleteStudent.js
+│   │   │   │   ├── editStudent.js
+│   │   │   │   ├── listStudent.js
+│   │   │   │   ├── getCourseMaterials.js
+│   │   │   │   ├── updateStudentProfile.js
+│   │   │   │   └── sendMessage.js
+│   │   │   ├── manageFaculty/
+│   │   │   │   ├── addFaculty.js
+│   │   │   │   ├── deleteFaculty.js
+│   │   │   │   └── assignCourses.js
+│   │   │   ├── manageAdmin/
+│   │   │   │   ├── addAdmin.js
+│   │   │   │   └── assignRoles.js
+│   │   │   └── eventManagement.js
+│   │   ├── helper/            # Helper Utilities
+│   │   │   ├── dbConnection.js
+│   │   │   └── responseHelper.js
+│   │   ├── middlewares/       # Middleware Functions
+│   │   │   ├── authenticate.js
+│   │   │   └── uploads.js
+│   │   ├── models/            # MongoDB Models
+│   │   │   ├── studentModel.js
+│   │   │   ├── teacherModel.js
+│   │   │   ├── adminModel.js
+│   │   │   ├── eventModel.js
+│   │   │   ├── courseModel.js
+│   │   │   └── messageModel.js
+│   │   ├── .env               # Environment Variables
+│   │   ├── index.js           # Entry Point
+│   │   ├── package-lock.json
+│   │   ├── package.json
+│   │   └── router.js          # Central API Router
+├── README.md                  # Project Documentation
+└── .gitignore                 # Git Ignore File
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+campus-management-system/
+├── frontend/                  # Frontend Directory
+│   ├── react-app/             # React App (Frontend Root)
+│   │   ├── public/            # Public Folder for Static Files
+│   │   │   ├── index.html
+│   │   │   ├── favicon.ico
+│   │   │   └── manifest.json
+│   │   ├── src/               # React Source Files
+│   │   │   ├── components/    # Reusable React Components
+│   │   │   │   ├── Navbar.js
+│   │   │   │   ├── Sidebar.js
+│   │   │   │   └── Footer.js
+│   │   │   ├── pages/         # React Pages
+│   │   │   │   ├── Admin/
+│   │   │   │   │   ├── Dashboard.js
+│   │   │   │   │   ├── ManageUsers.js
+│   │   │   │   │   ├── ManageCourses.js
+│   │   │   │   │   └── ManageEvents.js
+│   │   │   │   ├── Faculty/
+│   │   │   │   │   ├── Dashboard.js
+│   │   │   │   │   ├── Profile.js
+│   │   │   │   │   ├── UploadMaterials.js
+│   │   │   │   │   └── StudentInteraction.js
+│   │   │   │   ├── Student/
+│   │   │   │   │   ├── Dashboard.js
+│   │   │   │   │   ├── Profile.js
+│   │   │   │   │   ├── CourseMaterials.js
+│   │   │   │   │   └── AcademicCalendar.js
+│   │   │   │   ├── LoginPage.js
+│   │   │   │   └── RegisterPage.js
+│   │   │   ├── styles/        # CSS or Tailwind Styles
+│   │   │   │   └── global.css
+│   │   │   ├── App.js
+│   │   │   ├── index.js
+│   │   │   └── tailwind.config.js
+│   │   ├── package.json
+│   │   ├── package-lock.json
+│   │   └── README.md
+├── backend/                   # Backend Directory
+│   ├── public/                # Public Files for Uploads
+│   │   └── uploads/
+│   ├── src/                   # Backend Source Code
+│   │   ├── config/            # Configuration Files
+│   │   │   ├── constants.js
+│   │   │   └── global.js
+│   │   ├── controllers/       # API Controllers
+│   │   │   ├── manageUser/
+│   │   │   │   ├── addUser.js
+│   │   │   │   ├── editUser.js
+│   │   │   │   ├── editUser.js
+│   │   │   │   └── listUser.js
+│   │   │   ├── auth/
+│   │   │   │   ├── login.js
+│   │   │   │   └── register.js
+│   │   │   ├── courseManagement/
+│   │   │   │   ├── addCourse.js
+│   │   │   │   ├── editCourse.js
+│   │   │   │   ├── deleteCourse.js
+│   │   │   │   └── assignFacultyToCourse.js
+│   │   │   ├── departmentManagement/
+│   │   │   │   ├── addDepartment.js
+│   │   │   │   ├── editDepartment.js
+│   │   │   │   ├── deleteDepartment.js
+│   │   │   │   └── assignFacultyToDepartment.js
+│   │   │   ├── profileManagement/
+│   │   │   │   ├── facultyProfile.js
+│   │   │   │   ├── studentProfile.js
+│   │   │   │   ├── updateProfileUtils.js 
+│   │   │   │   └── profileValidation.js 
+│   │   │   ├── eventManagement.js
+│   │   │   │   └── academicCalendarController.js
+│   │   │   ├── libraryManagement/
+│   │   │   │   ├── listBooks.js
+│   │   │   │   └── addBooks.js
+│   │   │   ├── messaging/
+│   │   │   │   ├── messageController.js
+│   │   │   │   └── forumController.js 
+│   │   ├── helper/            # Helper Utilities
+│   │   │   ├── dbConnection.js
+│   │   │   └── responseHelper.js
+│   │   ├── middlewares/       # Middleware Functions
+│   │   │   ├── authenticate.js
+│   │   │   └── fileUpload.js
+│   │   ├── models/            # MongoDB Models
+│   │   │   ├── userModel.js
+│   │   │   ├── courseModel.js
+│   │   │   ├── eventModel.js
+│   │   │   ├── libraryModel.js
+│   │   │   └── messageModel.js
+│   │   ├── router.js
+│   │   ├── .env               # Environment Variables
+│   │   ├── index.js           # Entry Point
+│   │   ├── package-lock.json
+│   │   └── package.json
+├── README.md                  # Root Documentation
+└── .gitignore                 # Git Ignore File
+

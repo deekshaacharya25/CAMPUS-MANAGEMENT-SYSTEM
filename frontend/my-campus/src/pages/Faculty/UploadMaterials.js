@@ -19,7 +19,7 @@ const UploadMaterials = ({ courseId }) => {
         const response = await axios.get(`http://localhost:3000/api/course/materials?course_id=${courseId}`, {
           headers: { 'access_token': accessToken }
         });
-        setMaterials(response.data.materials || []); 
+        setMaterials(response.data.responseData.materials || []); // Ensure materials is an array
       } catch (err) {
         console.error("Failed to fetch materials:", err);
         setError("Failed to fetch materials. Please try again later.");
@@ -42,14 +42,17 @@ const UploadMaterials = ({ courseId }) => {
     setLoading(true);
     try {
       const newMaterial = {
+        type: "pdf",
         pdfUrl,
         title,
         description,
         course_id: courseId,
+        createdAt: new Date().toISOString(),
       };
-      await axios.post("http://localhost:3000/api/course/materials/upload/pdf", newMaterial, {
+      const response = await axios.post("http://localhost:3000/api/course/materials/upload/pdf", newMaterial, {
         headers: { 'access_token': accessToken }
       });
+      console.log("PDF Upload Response:", response.data);
       setMaterials((prevMaterials) => [...prevMaterials, newMaterial]);
       setPdfUrl(""); // Clear the input field
       setTitle(""); // Clear the title field
@@ -72,14 +75,17 @@ const UploadMaterials = ({ courseId }) => {
     setLoading(true);
     try {
       const newMaterial = {
-        videoUrl,
+        type: "video",
+        videoUrl, // Ensure the field name matches what the backend expects
         title,
         description,
         course_id: courseId,
+        createdAt: new Date().toISOString(),
       };
-      await axios.post("http://localhost:3000/api/course/materials/upload/video", newMaterial, {
+      const response = await axios.post("http://localhost:3000/api/course/materials/upload/video", newMaterial, {
         headers: { 'access_token': accessToken }
       });
+      console.log("Video Upload Response:", response.data);
       setMaterials((prevMaterials) => [...prevMaterials, newMaterial]);
       setVideoUrl(""); // Clear the input field
       setTitle(""); // Clear the title field
@@ -122,7 +128,8 @@ const UploadMaterials = ({ courseId }) => {
         content: file.name,
         title,
         description,
-        date: new Date().toLocaleDateString(),
+        file_url: response.data.file_url, // Assuming the response contains the file URL
+        createdAt: new Date().toISOString(),
         course_id: courseId,
       };
       setMaterials((prevMaterials) => [...prevMaterials, newMaterial]);
@@ -136,6 +143,11 @@ const UploadMaterials = ({ courseId }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   return (
@@ -242,28 +254,47 @@ const UploadMaterials = ({ courseId }) => {
       {/* Uploaded Materials */}
       <div className="border rounded-md p-4 bg-gray-50">
         <h2 className="text-xl font-semibold mb-3">Uploaded Materials</h2>
-        {materials && materials.length === 0 ? (
+        {materials.length === 0 ? (
           <p className="text-gray-500">No materials uploaded yet.</p>
         ) : (
           <ul className="list-disc list-inside">
-            {materials && materials.map((material) => (
-              <li key={material.id} className="mb-2">
+            {materials.map((material, index) => (
+              <li key={material._id || index} className="mb-2">
                 {material.type === "file" ? (
                   <>
-                    📄 <strong>{material.content}</strong> - Uploaded on{" "}
-                    {material.date}
+                    <a
+                      href={material.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      <strong>{material.title}</strong>
+                    </a>{" "}
+                    - Uploaded on {formatDate(material.createdAt)}
                   </>
-                ) : (
+                ) : material.type === "pdf" ? (
                   <>
-                    🎥 <a
+                    <a
                       href={material.content}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 underline"
                     >
-                      YouTube Video
+                      {material.title}
                     </a>{" "}
-                    - Uploaded on {material.date}
+                    - Uploaded on {formatDate(material.createdAt)}
+                  </>
+                ) : (
+                  <>
+                    <a
+                      href={material.content}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      {material.title}
+                    </a>{" "}
+                    - Uploaded on {formatDate(material.createdAt)}
                   </>
                 )}
               </li>
