@@ -3,6 +3,19 @@ import { FaBuildingColumns } from "react-icons/fa6";
 import { Link } from 'react-router-dom';
 
 function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
+  const getDashboardLink = () => {
+    switch (role) {
+      case 1:
+        return "/admin/dashboard";
+      case 2:
+        return "/faculty/dashboard";
+      case 3:
+        return "/student/dashboard";
+      default:
+        return "/";
+    }
+  };
+
   return (
     <div>
       <nav className="navbar bg-body-tertiary fixed-top">
@@ -22,7 +35,7 @@ function Navbar({ navbarTitle = 'Offcanvas navbar', role }) {
             <div className="offcanvas-body">
               <ul className="navbar-nav justify-content-start flex-grow-1 pe-3">
                 <li className="nav-item">
-                  <Link to="/admin/dashboard" className="nav-link">Dashboard</Link>
+                  <Link to={getDashboardLink()} className="nav-link">Dashboard</Link>
                 </li>
                 <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

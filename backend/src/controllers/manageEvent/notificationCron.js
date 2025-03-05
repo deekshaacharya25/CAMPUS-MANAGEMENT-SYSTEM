@@ -10,8 +10,8 @@ import { RESPONSE } from "../../config/global.js";
 
 const router = Router();
 
-// Cron job that runs at midnight
-cron.schedule('0 0 * * *', async () => {
+// Cron job that runs daily at 8 AM
+cron.schedule('0 8 * * *', async () => {
     try {
         await checkUpcomingEvents();
         console.log('Notification cron job completed successfully');
@@ -45,6 +45,25 @@ router.get("/list", authenticate, async (req, res) => {
     }
 });
 
+// API endpoint to delete a notification
+router.delete("/:id", authenticate, async (req, res) => {
+    try {
+        const notificationId = req.params.id;
+        const user_id = req.user.id;
+
+        const notification = await notificationModel.findOneAndDelete({ _id: notificationId, user_id: user_id });
+
+        if (!notification) {
+            return send(res, RESPONSE.NOT_FOUND, "Notification not found");
+        }
+
+        return send(res, RESPONSE.SUCCESS, "Notification deleted successfully");
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+        return send(res, RESPONSE.UNKNOWN_ERR);
+    }
+});
+
 // Function to check upcoming events and create notifications
 async function checkUpcomingEvents() {
     const today = new Date();
@@ -53,8 +72,8 @@ async function checkUpcomingEvents() {
     const upcomingEvents = await eventModel.find({
         isactive: STATE.ACTIVE,
         start_date: {
-            $gte: today,
-            $lte: nextWeek
+            $gte: nextWeek,
+            $lt: new Date(nextWeek.getTime() + 24 * 60 * 60 * 1000)
         }
     });
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { FaBell } from 'react-icons/fa';
+import { FaBell, FaTimes } from 'react-icons/fa';
 
 const AcademicCalendar = () => {
   const [events, setEvents] = useState(null);
@@ -62,7 +62,7 @@ const AcademicCalendar = () => {
   const fetchNotifications = async () => {
     const accessToken = localStorage.getItem("access_token");
     try {
-      const response = await axios.get("http://localhost:3000/api/event/notifications/list", {
+      const response = await axios.get("http://localhost:3000/api/notifications/list", {
         headers: {
           "access_token": accessToken,
         },
@@ -74,6 +74,24 @@ const AcademicCalendar = () => {
       }
     } catch (error) {
       console.error("Error fetching notifications:", error);
+    }
+  };
+
+  const deleteNotification = async (notificationId) => {
+    const accessToken = localStorage.getItem("access_token");
+    try {
+      const response = await axios.delete(`http://localhost:3000/api/notifications/${notificationId}`, {
+        headers: {
+          "access_token": accessToken,
+        },
+      });
+      if (response.data.responseCode === 200) {
+        setNotifications(notifications.filter(notification => notification._id !== notificationId));
+      } else {
+        console.error("Failed to delete notification:", response.data.responseMessage);
+      }
+    } catch (error) {
+      console.error("Error deleting notification:", error);
     }
   };
 
@@ -156,9 +174,15 @@ const AcademicCalendar = () => {
               <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
                 <ul>
                   {notifications.map((notification) => (
-                    <li key={notification._id} className="p-2 border-b border-gray-200">
-                      <strong>{notification.title}</strong>
-                      <p>{notification.message}</p>
+                    <li key={notification._id} className="p-2 border-b border-gray-200 flex justify-between items-center">
+                      <div>
+                        <strong>{notification.title}</strong>
+                        <p>{notification.message}</p>
+                      </div>
+                      <FaTimes
+                        className="text-red-600 cursor-pointer ml-2"
+                        onClick={() => deleteNotification(notification._id)}
+                      />
                     </li>
                   ))}
                 </ul>

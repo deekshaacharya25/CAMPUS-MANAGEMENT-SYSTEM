@@ -17,7 +17,7 @@ router.get("/", async (req, res) => {
     }
 
     if (department_id != undefined) {
-      query.$expr = { $eq: ["$_id", { $toObjectId: department_id }] };
+      query._id = new mongoose.Types.ObjectId(department_id);
     }
 
     console.log(query);

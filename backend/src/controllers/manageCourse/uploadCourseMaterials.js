@@ -7,6 +7,7 @@ import { send, setErrorRes } from '../../helper/responseHelper.js';
 import path from 'path';
 import { material } from '../../middlewares/uploads.js';
 import validator from 'validator';
+import fs from 'fs';
 
 const router = express.Router();
 
@@ -149,6 +150,12 @@ router.get("/:id", authenticate, async (req, res) => {
         }
 
         const filePath = path.join(process.cwd(), 'public', material.file_url);
+        
+        // Check if file exists
+        if (!fs.existsSync(filePath)) {
+            return send(res, setErrorRes(RESPONSE.NOT_FOUND, "file"));
+        }
+
         res.download(filePath);
 
     } catch (error) {
@@ -156,5 +163,4 @@ router.get("/:id", authenticate, async (req, res) => {
         return send(res, RESPONSE.UNKNOWN_ERR);
     }
 });
-
 export default router;

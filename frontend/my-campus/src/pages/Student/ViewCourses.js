@@ -13,7 +13,6 @@ const ViewCourses = () => {
     const token = localStorage.getItem('access_token');
     if (token) {
       const decoded = jwtDecode(token);
-      console.log('Decoded token:', decoded);
       setUserDepartmentId(decoded.departmentId);
     }
   }, []);
@@ -27,31 +26,22 @@ const ViewCourses = () => {
   const fetchDepartmentAndCourses = async () => {
     try {
       const accessToken = localStorage.getItem('access_token');
-      console.log('User Department ID:', userDepartmentId); 
-      console.log(`Fetching department and courses for department_id: ${userDepartmentId}`);
       const response = await axios.get(`http://localhost:3000/api/department/list/?department_id=${userDepartmentId}`, {
         headers: { access_token: accessToken },
       });
-
-      console.log('API Response:', response.data); 
 
       if (response.data.responseCode === 200) {
         const departmentArray = response.data.responseData;
         if (departmentArray.length > 0) {
           const department = departmentArray[0];
-          console.log('Department:', department); 
-          console.log('Department Courses:', department.courses);
-
           if (department.courses && department.courses.length > 0) {
             const courses = await fetchCourses(department.courses);
             department.courses = courses;
             setDepartments([department]);
           } else {
-            console.log('No courses found in the department');
             setDepartments([{ ...department, courses: [] }]);
           }
         } else {
-          console.log('No department found');
           setDepartments([]);
         }
       } else {
@@ -59,7 +49,6 @@ const ViewCourses = () => {
       }
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching department and courses:', error);
       setError(error.message);
       setLoading(false);
     }
@@ -67,34 +56,49 @@ const ViewCourses = () => {
 
   const fetchCourses = async (courseIds) => {
     if (!courseIds?.length) {
-      console.log('No course IDs provided');
       return [];
     }
     try {
       const accessToken = localStorage.getItem('access_token');
       const courseDetails = [];
       for (const courseId of courseIds) {
-        console.log(`Fetching course details for course_id: ${courseId}`);
         const response = await axios.get(`http://localhost:3000/api/course/list/?course_id=${courseId}`, {
           headers: { access_token: accessToken },
         });
-        console.log('API Response for course:', response.data.responseData);
         const course = response.data.responseData[0];
 
         const materialsResponse = await axios.get(`http://localhost:3000/api/course/materials?course_id=${courseId}`, {
           headers: { access_token: accessToken },
         });
-        console.log('API Response for materials:', materialsResponse.data);
         course.materials = materialsResponse.data.responseData.materials;
-        console.log('Fetched materials for course:', course.materials);
 
         courseDetails.push(course);
       }
-      console.log('Fetched course details:', courseDetails);
       return courseDetails;
     } catch (error) {
-      console.error('Error fetching courses:', error);
       return [];
+    }
+  };
+
+  const handleDownload = async (material) => {
+    try {
+      const accessToken = localStorage.getItem('access_token');
+      const response = await axios.get(`http://localhost:3000/api/course/materials/${material._id}`, {
+        headers: { access_token: accessToken },
+        responseType: 'blob'
+      });
+
+      const blob = new Blob([response.data], { type: material.file_type });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = material.title + material.file_type;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert('Failed to download the file');
     }
   };
 
@@ -107,7 +111,6 @@ const ViewCourses = () => {
       }
       return `https://www.youtube.com/embed/${videoId}`;
     } catch (error) {
-      console.error("Invalid YouTube URL:", url);
       return "";
     }
   };
@@ -173,10 +176,12 @@ const ViewCourses = () => {
                                   <>
                                     📄 <strong>{material.title}</strong> - Uploaded on{" "}
                                     {new Date(material.createdAt).toLocaleDateString()}
-                                    <a href={material.file_url} target="_blank" rel="noopener noreferrer" 
-                                      className="text-yellow-600 hover:text-yellow-700 font-medium ml-2">
+                                    <button
+                                      onClick={() => handleDownload(material)}
+                                      className="text-yellow-600 hover:text-yellow-700 font-medium ml-2"
+                                    >
                                       Download
-                                    </a>
+                                    </button>
                                   </>
                                 )}
                               </li>

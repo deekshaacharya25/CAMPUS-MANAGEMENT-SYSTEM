@@ -34,7 +34,7 @@ const CourseMaterials = () => {
     const newMaterial = {
       id: Date.now(),
       type: "file",
-      content: file.name,
+      content: `/uploads/${file.name}`, // Assuming the file is uploaded to the /public/uploads directory
       date: new Date().toLocaleDateString(),
     };
     setMaterials((prevMaterials) => [...prevMaterials, newMaterial]);
@@ -94,8 +94,9 @@ const CourseMaterials = () => {
               <li key={material.id} className="mb-2">
                 {material.type === "file" ? (
                   <>
-                    📄 <strong>{material.content}</strong> - Uploaded on{" "}
-                    {material.date}
+                    📄 <a href={material.content} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                      <strong>{material.content}</strong>
+                    </a> - Uploaded on {material.date}
                   </>
                 ) : (
                   <>
@@ -104,9 +105,7 @@ const CourseMaterials = () => {
                       <iframe
                         width="560"
                         height="315"
-                        src={`https://www.youtube.com/embed/${new URL(
-                          material.content
-                        ).searchParams.get("v")}`}
+                        src={`https://www.youtube.com/embed/${new URL(material.content).searchParams.get("v")}`}
                         title="YouTube video"
                         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
